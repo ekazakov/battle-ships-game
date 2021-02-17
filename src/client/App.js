@@ -1,5 +1,4 @@
-// import React from "react";
-const React = require("react");
+import React from "react";
 
 function App() {
   return <div>Hello App</div>;

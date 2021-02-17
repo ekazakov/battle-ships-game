@@ -1,4 +1,4 @@
-const getNextId = require("./id-generator");
+const getNextId = require("../common/id-generator");
 
 module.exports = class User {
   constructor(name, password) {

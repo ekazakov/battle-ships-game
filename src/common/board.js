@@ -1,4 +1,4 @@
-const { BOARD_SIZE, Direction, ShipType } = require("./constnats");
+const { BOARD_SIZE, Direction, ShipType } = require("./constants");
 const { Cell } = require("./cell");
 const { Ship } = require("./ship");
 
@@ -87,6 +87,7 @@ function getRandomInteger(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+// eslint-disable-next-line no-unused-vars
 function getRandomPosition(size) {
   return {
     x: getRandomInteger(0, size),
@@ -94,6 +95,7 @@ function getRandomPosition(size) {
   };
 }
 
+// eslint-disable-next-line no-unused-vars
 function getRandomDirection() {
   if (getRandomInteger(0, 1) === 0) {
     return Direction.VERTICAL;
@@ -102,9 +104,9 @@ function getRandomDirection() {
   return Direction.HORIZONTAL;
 }
 
-function testPostion(position, direction, ship, cells) {}
+// function testPostion(position, direction, ship, cells) {}
 
-export class Board {
+module.exports = class Board {
   constructor({ size } = { size: BOARD_SIZE }) {
     this._size = size;
     this._cells = createCells(size);
@@ -117,13 +119,12 @@ export class Board {
       const { x, y, direction } = layout[index];
       const position = { x, y };
       ship.setPosition(position, direction);
-      this._markOccupaedCells(position, direction, ship);
+      this._markOccupiedCells(position, direction, ship);
     });
   }
 
-  _markOccupaedCells(position, direction, ship) {
-    let x = position.x;
-    let y = position.y;
+  _markOccupiedCells(position, direction, ship) {
+    let { x, y } = position;
     for (let i = 0; i < ship.getSize(); i++) {
       this._cells[y][x].addShip(ship);
       if (direction === Direction.HORIZONTAL) {
@@ -141,7 +142,7 @@ export class Board {
   getSnapshoot() {
     const snapshoot = new Array(this._size);
     for (let i = 0; i < this._size; i++) {
-      let row = new Array(this._size);
+      const row = new Array(this._size);
       for (let j = 0; j < this._size; j++) {
         const cell = this._cells[i][j];
         if (cell.getShip() && cell.isHit()) {
@@ -163,7 +164,7 @@ export class Board {
   getPublicSnapshoot() {
     const snapshoot = new Array(this._size);
     for (let i = 0; i < this._size; i++) {
-      let row = new Array(this._size);
+      const row = new Array(this._size);
       for (let j = 0; j < this._size; j++) {
         const cell = this._cells[i][j];
         if (cell.getShip() && cell.isHit()) {
@@ -202,10 +203,6 @@ export class Board {
     const cell = this._getCell(positon);
     const ship = cell.getShip();
 
-    // if (cell.isHitBefore(positon)) {
-    //   return false;
-    // }
-
     return ship != null && ship.isDestroyed();
   }
-}
+};

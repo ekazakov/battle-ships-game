@@ -9,7 +9,6 @@ const getNextId = require("./id-generator");
 
 const States = {
   IDLE: "idle",
-
   AWAITING_PLAYER: "awaitingPlayer",
   PLAYER_JOINED: "playerJoined",
   AWAITING_START: "awaitingStart",
@@ -18,6 +17,8 @@ const States = {
   FINISHED: "finished",
   DESTROYED: "destroyed"
 };
+
+exports.States = States;
 
 function createGame() {
   return StateMachine({
@@ -96,7 +97,10 @@ exports.Game = class Game {
     this._id = getNextId("game");
     this._owner = owner;
     this._machine = createGame();
-    this._state = getState(this._machine);
+  }
+
+  getId() {
+    return this._id;
   }
 
   getState() {
@@ -104,10 +108,12 @@ exports.Game = class Game {
   }
 
   initialize() {
-    this._machine.initialize(this.owner);
+    this._machine.initialize(this._owner);
   }
 
-  start() {}
+  start() {
+    this._machine.start();
+  }
 
   join(player) {
     this._machine.join(player);
@@ -130,7 +136,9 @@ exports.Game = class Game {
     this._machine.destroy();
   }
 
-  finish() {}
+  finish() {
+    this._machine.finish();
+  }
 
   getCurrentPlayer() {
     return this._machine.currentPlayer;

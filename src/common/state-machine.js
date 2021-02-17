@@ -1,7 +1,7 @@
 const STATE = Symbol("state");
+const CURRENT_STATE_NAME = Symbol("current-state-name");
 const STATES = Symbol("states");
 const STARTING_STATE = Symbol("starting-state");
-
 const RESERVED = [STATES, STARTING_STATE];
 
 exports.StateMachine = function StateMachine(description) {
@@ -45,19 +45,21 @@ exports.StateMachine = function StateMachine(description) {
   }
 
   machine[STATE] = description[STATES][description[STARTING_STATE]];
+  machine[CURRENT_STATE_NAME] = description[STARTING_STATE];
+  return machine;
 };
 
 exports.transitionTo = function transitionTo(stateName, fn) {
   return function (...args) {
     const result = fn.apply(this, args);
     this[STATE] = this[STATES][stateName];
-
+    this[CURRENT_STATE_NAME] = stateName;
     return result;
   };
 };
 
 exports.getState = function getState(machine) {
-  return machine[STATE];
+  return machine[CURRENT_STATE_NAME];
 };
 
 exports.STATES = STATES;

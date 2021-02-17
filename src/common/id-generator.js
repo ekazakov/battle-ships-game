@@ -5,8 +5,8 @@ module.exports = function getNextId(prefix) {
     const value = counters.get(prefix) + 1;
     counters.set(prefix, value);
     return value;
-  } else {
-    counters.set(prefix, 1);
-    return 1;
   }
+
+  counters.set(prefix, 1);
+  return 1;
 };

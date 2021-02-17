@@ -1,5 +1,9 @@
 const { FastifySSEPlugin } = require("fastify-sse-v2");
-const fastify = require("fastify")({
+const FastifyCookiePlugin = require("fastify-cookie");
+const fastifyFactory = require("fastify");
+const customAjvKeywords = require("./custom-ajv-keywords");
+
+const fastify = fastifyFactory(({
   logger: {
     prettyPrint: true
   },
@@ -11,12 +15,12 @@ const fastify = require("fastify")({
       allErrors: false,
       nullable: true
     },
-    plugins: [require("./custom-ajv-keywords")]
+    plugins: [customAjvKeywords]
   }
-});
+}));
 
 fastify.register(FastifySSEPlugin);
-fastify.register(require("fastify-cookie"));
+fastify.register(FastifyCookiePlugin);
 fastify.register(require("./routes/auth"));
 fastify.register(require("./routes/game"));
 
