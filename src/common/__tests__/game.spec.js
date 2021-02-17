@@ -1,7 +1,7 @@
 const { Game, States } = require("../game");
 
 describe("Game", function () {
-  describe("Game id", () => {
+  describe("should have id", () => {
     let game = null;
     beforeEach(() => {
       game = new Game({});
@@ -18,13 +18,13 @@ describe("Game", function () {
       game = new Game({});
     });
 
-    it("new game in IDLE state", () => {
+    it("should be in IDLE state", () => {
       expect(game.getState()).toBe(States.IDLE);
     });
-  });
 
-  describe("", function () {
-    it.skip("game", () => {});
-    it("game 2", () => {});
+    it("should be in AWAITING_PLAYER after initialization", () => {
+      game.initialize();
+      expect(game.getState()).toBe(States.AWAITING_PLAYER);
+    });
   });
 });
