@@ -18,14 +18,14 @@ exports.StateMachine = function StateMachine(description) {
   machine[STATES] = description[STATES];
 
   const eventNames = Object.entries(description[STATES]).reduce(
-    (eventNames, [state, stateDescription]) => {
+    (names, [, stateDescription]) => {
       const eventNamesForState = Object.keys(stateDescription);
 
       for (const eventName of eventNamesForState) {
-        eventNames.add(eventName);
+        names.add(eventName);
       }
 
-      return eventNames;
+      return names;
     },
     new Set()
   );
@@ -49,13 +49,26 @@ exports.StateMachine = function StateMachine(description) {
   return machine;
 };
 
-exports.transitionTo = function transitionTo(stateName, fn) {
-  return function (...args) {
-    const result = fn.apply(this, args);
-    this[STATE] = this[STATES][stateName];
-    this[CURRENT_STATE_NAME] = stateName;
-    return result;
-  };
+exports.transitionTo = function transitionTo(...params) {
+  if (params.length === 2) {
+    const [stateName, fn] = params;
+    return function transition(...args) {
+      fn.apply(this, args);
+      this[STATE] = this[STATES][stateName];
+      this[CURRENT_STATE_NAME] = stateName;
+    };
+  }
+
+  if (params.length === 1 && typeof params[0] === "function") {
+    const [fn] = params;
+    return function transition(...args) {
+      const nextState = fn.apply(this, args);
+      this[STATE] = this[STATES][nextState];
+      this[CURRENT_STATE_NAME] = nextState;
+    };
+  }
+
+  throw new Error("Unsupported arguments");
 };
 
 exports.getState = function getState(machine) {

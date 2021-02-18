@@ -23,14 +23,15 @@ exports.Cell = class Cell {
 
   processShoot() {
     if (!this._isHit) {
-      const { x, y } = this._position;
-      console.log("cell > process shoot:", `(${x}, ${y})`);
+      // const { x, y } = this._position;
+      // console.log("cell > process shoot:", `(${x}, ${y})`);
       this._isHit = true;
       if (!this.isEmpty()) {
         this._ship.processShoot();
       }
-    } else {
-      console.log("cell > process shoot: already hit");
     }
+    // else {
+    //   console.log("cell > process shoot: already hit");
+    // }
   }
 };

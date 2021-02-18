@@ -6,14 +6,16 @@ const {
   STARTING_STATE
 } = require("../common/state-machine");
 const getNextId = require("./id-generator");
+const { Board } = require("./board");
+const { ShootResult } = require("./constants.js");
 
 const States = {
   IDLE: "idle",
-  AWAITING_PLAYER: "awaitingPlayer",
-  PLAYER_JOINED: "playerJoined",
+  AWAITING_PLAYER: "awaiting",
+  // PLAYER_JOINED: "playerJoined",
   AWAITING_START: "awaitingStart",
-  PLAYER_A_TURN: "playerATurn",
-  PLAYER_B_TURN: "playerBTurn",
+  PLAYER_TURN: "playerATurn",
+  // PLAYER_B_TURN: "playerBTurn",
   FINISHED: "finished",
   DESTROYED: "destroyed"
 };
@@ -24,17 +26,13 @@ function createGame() {
   return StateMachine({
     playerA: null,
     playerB: null,
-
-    currentPlayer: null,
-    waitingPlayer: null,
+    boards: new Map(),
+    current: null,
+    waiting: null,
 
     switchPlayer() {
-      console.log(`Pass turn to player: ${this.waiting().getId()}`);
-
-      [this.currentPlayer, this.waitingPlayer] = [
-        this.waitingPlayer,
-        this.currentPlayer
-      ];
+      // console.log(`Pass turn to player: ${this.waiting().getId()}`);
+      [this.current, this.waiting] = [this.waiting, this.current];
     },
 
     [STARTING_STATE]: States.IDLE,
@@ -42,50 +40,68 @@ function createGame() {
       [States.IDLE]: {
         initialize: transitionTo(States.AWAITING_PLAYER, function (playerA) {
           this.playerA = playerA;
+          this.boards.set(playerA, new Board());
         })
       },
       [States.AWAITING_PLAYER]: {
-        join: transitionTo(States.PLAYER_JOINED, function (playerB) {
+        join: transitionTo(States.AWAITING_START, function (playerB) {
           this.playerB = playerB;
+          this.boards.set(playerB, new Board());
         }),
-        destroy: transitionTo(States.DESTROYED, function () {})
-      },
-      [States.PLAYER_JOINED]: {
-        leave: transitionTo(States.AWAITING_START, function () {}),
         destroy: transitionTo(States.DESTROYED, function () {})
       },
       [States.AWAITING_START]: {
-        start: transitionTo(States.PLAYER_A_TURN, function () {
-          this.currentPlayer = this.playerA;
-          this.waitingPlayer = this.playerB;
+        leave: transitionTo(States.AWAITING_PLAYER, function (player) {
+          if (player === this.playerA) {
+            this.playerA = null;
+          } else if (player === this.playerB) {
+            this.playerB = null;
+          } else {
+            throw Error(`Player with ${player.id} is not in a game`);
+          }
+        }),
+        start: transitionTo(States.PLAYER_TURN, function () {
+          this.current = this.playerA;
+          this.waiting = this.playerB;
         }),
         destroy: transitionTo(States.DESTROYED, function () {})
       },
 
-      [States.PLAYER_A_TURN]: {
-        makeShot: transitionTo(States.PLAYER_B_TURN, function (player) {
-          if (player !== this.playerA) {
-            throw new Error("Player can't act durign other player turn");
+      [States.PLAYER_TURN]: {
+        makeShot: transitionTo(function (player, position) {
+          if (player !== this.current) {
+            throw new Error("Player can't act during other player turn");
           }
 
-          this.switchPlayer();
-        }),
-        finish: transitionTo(States.FINISHED, function () {}),
-        destroy: transitionTo(States.DESTROYED, function () {})
-      },
-      [States.PLAYER_B_TURN]: {
-        makeShot: transitionTo(States.PLAYER_A_TURN, function (player) {
-          if (player !== this.playerB) {
-            throw new Error("Player can't act durign other player turn");
+          const board = this.boards.get(this.waiting);
+          const result = board.processShoot(position);
+
+          if (board.isAllShipsDestroyed()) {
+            // console.log(`Game Over. Player #${current.getId()} wins!`);
+            return States.FINISHED;
           }
 
-          this.switchPlayer();
+          if (result === ShootResult.MISS) {
+            this.switchPlayer();
+          }
+
+          return States.PLAYER_TURN;
         }),
-        finish: transitionTo(States.FINISHED, function () {}),
         destroy: transitionTo(States.DESTROYED, function () {})
       },
+      // [States.PLAYER_B_TURN]: {
+      //   makeShot: transitionTo(States.PLAYER_TURN, function (player) {
+      //     if (player !== this.playerB) {
+      //       throw new Error("Player can't act during other player turn");
+      //     }
+      //
+      //     this.switchPlayer();
+      //   }),
+      //   finish: transitionTo(States.FINISHED, function () {}),
+      //   destroy: transitionTo(States.DESTROYED, function () {})
+      // },
       [States.FINISHED]: {
-        destroy: transitionTo(States.DESTROYED, function () {})
+        // destroy: transitionTo(States.DESTROYED, function () {})
       },
       [States.DESTROYED]: {}
     }
@@ -123,7 +139,7 @@ exports.Game = class Game {
     if (player === this._owner) {
       this._machine.destroy();
     } else {
-      this._machine.leave();
+      this._machine.leave(player);
     }
   }
 
@@ -136,29 +152,38 @@ exports.Game = class Game {
     this._machine.destroy();
   }
 
-  finish() {
-    this._machine.finish();
-  }
+  // finish() {
+  //   this._machine.finish();
+  // }
 
   getCurrentPlayer() {
-    return this._machine.currentPlayer;
+    return this._machine.current;
   }
 
   getWaitingPlayer() {
-    return this._machine.waitingPlayer;
+    return this._machine.waiting;
+  }
+
+  getBoard(player) {
+    return this._machine.boards.get(player);
   }
 
   getGameState() {
     const current = this.getCurrentPlayer();
     const waiting = this.getWaitingPlayer();
-    const winnerId = waiting.isAllShipsDestroyed() ? current.getId() : null;
+    const currentBoard = this.getBoard(current);
+    const waitingBoard = this.getBoard(waiting);
+    const winnerId = waitingBoard.isAllShipsDestroyed()
+      ? current.getId()
+      : null;
 
     return {
+      state: this.getState(),
       winnerId,
-      currentPlayer: current.getInfo(),
-      waitingPlayer: waiting.getInfo(),
-      ownBoard: current.getBoard().getSnapshoot(),
-      enemyBoard: waiting.getBoard().getPublicSnapshoot()
+      current: current.getInfo(),
+      waiting: waiting.getInfo(),
+      ownBoard: currentBoard.getSnapshoot(),
+      enemyBoard: waitingBoard.getPublicSnapshoot()
     };
   }
 };

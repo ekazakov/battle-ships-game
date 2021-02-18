@@ -1,3 +1,4 @@
+const { ShootResult } = require("./constants");
 const { BOARD_SIZE, Direction, ShipType } = require("./constants");
 const { Cell } = require("./cell");
 const { Ship } = require("./ship");
@@ -106,7 +107,7 @@ function getRandomDirection() {
 
 // function testPostion(position, direction, ship, cells) {}
 
-module.exports = class Board {
+exports.Board = class Board {
   constructor({ size } = { size: BOARD_SIZE }) {
     this._size = size;
     this._cells = createCells(size);
@@ -183,24 +184,37 @@ module.exports = class Board {
     return snapshoot;
   }
 
-  _getCell(positon) {
-    return this._cells[positon.y][positon.x];
+  _getCell(position) {
+    return this._cells[position.y][position.x];
   }
 
-  processShoot(positon) {
-    this._getCell(positon).processShoot();
+  processShoot(position) {
+    if (this.isHit(position)) {
+      return ShootResult.REPEAT;
+    }
+    this._getCell(position).processShoot();
+
+    if (this.isEmptyCell(position)) {
+      return ShootResult.MISS;
+    }
+
+    if (this.isShipDestroyed(position)) {
+      return ShootResult.KILL;
+    }
+
+    return ShootResult.HIT;
   }
 
-  isHit(positon) {
-    return this._getCell(positon).isHit();
+  isHit(position) {
+    return this._getCell(position).isHit();
   }
 
-  isEmptyCell(positon) {
-    return this._getCell(positon).isEmpty();
+  isEmptyCell(position) {
+    return this._getCell(position).isEmpty();
   }
 
-  isShipDestroyed(positon) {
-    const cell = this._getCell(positon);
+  isShipDestroyed(position) {
+    const cell = this._getCell(position);
     const ship = cell.getShip();
 
     return ship != null && ship.isDestroyed();
