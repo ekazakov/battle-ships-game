@@ -12,10 +12,8 @@ const { ShootResult } = require("./constants.js");
 const States = {
   IDLE: "idle",
   AWAITING_PLAYER: "awaiting",
-  // PLAYER_JOINED: "playerJoined",
   AWAITING_START: "awaitingStart",
-  PLAYER_TURN: "playerATurn",
-  // PLAYER_B_TURN: "playerBTurn",
+  PLAYER_TURN: "playerTurn",
   FINISHED: "finished",
   DESTROYED: "destroyed"
 };
@@ -31,7 +29,6 @@ function createGame() {
     waiting: null,
 
     switchPlayer() {
-      // console.log(`Pass turn to player: ${this.waiting().getId()}`);
       [this.current, this.waiting] = [this.waiting, this.current];
     },
 
@@ -77,7 +74,6 @@ function createGame() {
           const result = board.processShoot(position);
 
           if (board.isAllShipsDestroyed()) {
-            // console.log(`Game Over. Player #${current.getId()} wins!`);
             return States.FINISHED;
           }
 
@@ -89,20 +85,7 @@ function createGame() {
         }),
         destroy: transitionTo(States.DESTROYED, function () {})
       },
-      // [States.PLAYER_B_TURN]: {
-      //   makeShot: transitionTo(States.PLAYER_TURN, function (player) {
-      //     if (player !== this.playerB) {
-      //       throw new Error("Player can't act during other player turn");
-      //     }
-      //
-      //     this.switchPlayer();
-      //   }),
-      //   finish: transitionTo(States.FINISHED, function () {}),
-      //   destroy: transitionTo(States.DESTROYED, function () {})
-      // },
-      [States.FINISHED]: {
-        // destroy: transitionTo(States.DESTROYED, function () {})
-      },
+      [States.FINISHED]: {},
       [States.DESTROYED]: {}
     }
   });
@@ -152,10 +135,6 @@ exports.Game = class Game {
     this._machine.destroy();
   }
 
-  // finish() {
-  //   this._machine.finish();
-  // }
-
   getCurrentPlayer() {
     return this._machine.current;
   }
@@ -173,17 +152,16 @@ exports.Game = class Game {
     const waiting = this.getWaitingPlayer();
     const currentBoard = this.getBoard(current);
     const waitingBoard = this.getBoard(waiting);
-    const winnerId = waitingBoard.isAllShipsDestroyed()
-      ? current.getId()
-      : null;
+    const winnerId =
+      waitingBoard?.isAllShipsDestroyed() ?? false ? current.getId() : null;
 
     return {
       state: this.getState(),
       winnerId,
-      current: current.getInfo(),
-      waiting: waiting.getInfo(),
-      ownBoard: currentBoard.getSnapshoot(),
-      enemyBoard: waitingBoard.getPublicSnapshoot()
+      current: current?.getInfo() ?? null,
+      waiting: waiting?.getInfo() ?? null,
+      ownBoard: currentBoard?.getSnapshoot() ?? null,
+      enemyBoard: waitingBoard?.getPublicSnapshoot() ?? null
     };
   }
 };

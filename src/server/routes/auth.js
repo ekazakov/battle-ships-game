@@ -32,7 +32,7 @@ const registrationSchema = {
   }
 };
 
-async function routes(fastify, options) {
+async function routes(fastify) {
   fastify.addHook("onRequest", async function (request) {
     console.log(">>>> preHandler hoo on auth routes:", request.cookies.auth);
   });

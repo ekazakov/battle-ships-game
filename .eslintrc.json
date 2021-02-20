@@ -1,7 +1,11 @@
 {
   "parser": "babel-eslint",
-  "extends": ["airbnb"],
-  "plugins": ["jest"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:prettier/recommended"
+  ],
+  "plugins": ["jest", "react", "prettier"],
   "env": {
     "browser": true,
     "node": true,
@@ -17,6 +21,7 @@
     "arrow-parens": ["error", "always"],
     "prefer-arrow-callback": "off",
     "no-plusplus": "off",
-    "no-restricted-syntax": "off"
+    "no-restricted-syntax": "off",
+    "object-curly-newline": "off"
   }
 }

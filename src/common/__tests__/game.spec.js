@@ -1,3 +1,4 @@
+const { Direction } = require("../constants");
 const { Game, States } = require("../game");
 
 function createPlayer(id) {
@@ -57,6 +58,20 @@ describe("Game", function () {
       game.initialize();
       game.join(playerB);
       expect(game.getState()).toBe(States.AWAITING_START);
+    });
+
+    it("should transition to DESTROYED state", () => {
+      expect.hasAssertions();
+      game.initialize();
+      game.join(playerB);
+      game.destroy();
+
+      expect(game.getGameState()).toMatchObject({
+        state: States.DESTROYED,
+        winnerId: null,
+        current: null,
+        waiting: null
+      });
     });
 
     describe("AWAITING_START", () => {
@@ -135,6 +150,94 @@ describe("Game", function () {
         expect(game.getGameState()).toMatchSnapshot({
           state: States.PLAYER_TURN,
           winnerId: null,
+          current: { name: "Player 1", id: "player_1" },
+          waiting: { name: "Player 2", id: "player_2" }
+        });
+      });
+
+      it("should finish game when the player destroyed all ships of other player", () => {
+        const targets = [
+          {
+            direction: Direction.HORIZONTAL,
+            x: 6,
+            y: 0,
+            size: 4
+          },
+          {
+            direction: Direction.VERTICAL,
+            x: 3,
+            y: 0,
+            size: 3
+          },
+          {
+            direction: Direction.VERTICAL,
+            x: 1,
+            y: 4,
+            size: 3
+          },
+          {
+            direction: Direction.HORIZONTAL,
+            x: 0,
+            y: 0,
+            size: 2
+          },
+          {
+            direction: Direction.VERTICAL,
+            x: 9,
+            y: 2,
+            size: 2
+          },
+          {
+            direction: Direction.VERTICAL,
+            x: 8,
+            y: 8,
+            size: 2
+          },
+          {
+            direction: Direction.VERTICAL,
+            x: 6,
+            y: 5,
+            size: 1
+          },
+          {
+            direction: Direction.VERTICAL,
+            x: 3,
+            y: 8,
+            size: 1
+          },
+          {
+            direction: Direction.VERTICAL,
+            x: 5,
+            y: 8,
+            size: 1
+          },
+          {
+            direction: Direction.VERTICAL,
+            x: 0,
+            y: 9,
+            size: 1
+          }
+        ];
+
+        expect.hasAssertions();
+        game.initialize();
+        game.join(playerB);
+        game.start();
+
+        targets.forEach((target) => {
+          const { size, direction, x, y } = target;
+          for (let i = 0; i < size; i++) {
+            const position = {
+              x: direction === Direction.HORIZONTAL ? x + i : x,
+              y: direction === Direction.VERTICAL ? y + i : y
+            };
+            game.makeShot(playerA, position);
+          }
+        });
+
+        expect(game.getGameState()).toMatchSnapshot({
+          state: States.FINISHED,
+          winnerId: playerA.getId(),
           current: { name: "Player 1", id: "player_1" },
           waiting: { name: "Player 2", id: "player_2" }
         });
