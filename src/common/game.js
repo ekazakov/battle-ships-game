@@ -6,6 +6,7 @@ const {
   STARTING_STATE
 } = require("../common/state-machine");
 const getNextId = require("./id-generator");
+const { Observer } = require("./observer");
 const { Board } = require("./board");
 const { ShootResult } = require("./constants.js");
 
@@ -91,11 +92,15 @@ function createGame() {
   });
 }
 
-exports.Game = class Game {
+exports.Game = class Game extends Observer {
   constructor(owner) {
+    super();
     this._id = getNextId("game");
     this._owner = owner;
     this._machine = createGame();
+    this._machine.onStateTransition = () => {
+      this._notify("update", this.getGameState());
+    };
   }
 
   getId() {

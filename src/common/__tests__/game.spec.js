@@ -48,8 +48,12 @@ describe("Game", function () {
 
     it("should be in AWAITING_PLAYER after initialization", () => {
       expect.hasAssertions();
+      const fn = jest.fn();
+      game.addObserver(fn);
       game.initialize();
+
       expect(game.getState()).toBe(States.AWAITING_PLAYER);
+      expect(fn).toHaveBeenCalled();
     });
 
     it("should be in AWAITING_START after second player joined", () => {

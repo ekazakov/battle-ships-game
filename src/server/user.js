@@ -5,6 +5,7 @@ module.exports = class User {
     this._name = name;
     this._password = password;
     this._id = getNextId("user");
+    this._gameId = null;
   }
 
   getName() {
@@ -13,6 +14,14 @@ module.exports = class User {
 
   getId() {
     return this._id;
+  }
+
+  setGame(gameId) {
+    this._gameId = gameId;
+  }
+
+  getGameId() {
+    return this._gameId;
   }
 
   isLoginAndPasswordValid(name, password) {

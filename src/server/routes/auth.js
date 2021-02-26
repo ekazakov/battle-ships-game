@@ -2,19 +2,19 @@ const {
   isUserWithNameExists,
   getUserByName,
   registerUser
-} = require("../model");
+} = require("../user-store");
 const User = require("../user");
 
+const passwordScheme = {
+  password: { type: "string", minLength: 5, maxLength: 50 }
+};
+const loginProps = { type: "string", minLength: 5, maxLength: 50 };
 const loginSchema = {
   type: "object",
   required: ["login", "password"],
   properties: {
-    login: {
-      type: "string",
-      minLength: 5,
-      maxLength: 50
-    },
-    password: { type: "string", minLength: 1, maxLength: 50 }
+    login: loginProps,
+    ...passwordScheme
   }
 };
 
@@ -23,19 +23,18 @@ const registrationSchema = {
   required: ["login", "password"],
   properties: {
     login: {
-      type: "string",
-      minLength: 5,
-      maxLength: 50,
+      ...loginProps,
       uniqueLogin: true
     },
-    password: { type: "string", minLength: 1, maxLength: 50 }
+    ...passwordScheme
   }
 };
 
+function createAuthCookie(user) {
+  return ["auth", `auth-token#${user.getId()}`];
+}
+
 async function routes(fastify) {
-  fastify.addHook("onRequest", async function (request) {
-    console.log(">>>> preHandler hoo on auth routes:", request.cookies.auth);
-  });
   fastify.post(
     "/api/register",
     { schema: { body: registrationSchema } },
@@ -45,7 +44,7 @@ async function routes(fastify) {
 
       const user = new User(login, password);
       registerUser(user);
-      reply.setCookie("auth", `auth-token:${user.getId()}`);
+      reply.setCookie(...createAuthCookie(user));
       return { result: "success" };
     }
   );
@@ -59,12 +58,13 @@ async function routes(fastify) {
       if (isUserWithNameExists(login)) {
         const user = getUserByName(login);
         if (user.isLoginAndPasswordValid(login, password)) {
-          reply.setCookie("auth", `auth-token:${user.getId()}`);
+          reply.setCookie(...createAuthCookie(user));
           return { result: "success" };
         }
       }
 
-      return { result: "error", message: "Login or password are invalid" };
+      reply.code(400);
+      return { error: "Bad Request", message: "Login or password are invalid" };
     }
   );
 

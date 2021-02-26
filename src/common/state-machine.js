@@ -2,10 +2,17 @@ const STATE = Symbol("state");
 const CURRENT_STATE_NAME = Symbol("current-state-name");
 const STATES = Symbol("states");
 const STARTING_STATE = Symbol("starting-state");
+const ON_STATE_TRANSITION = Symbol("on-state-transition");
 const RESERVED = [STATES, STARTING_STATE];
 
 exports.StateMachine = function StateMachine(description) {
-  const machine = {};
+  const machine = {
+    [ON_STATE_TRANSITION]() {
+      if (typeof this.onStateTransition === "function") {
+        this.onStateTransition();
+      }
+    }
+  };
 
   const propsAndMethods = Object.keys(description).filter(
     (prop) => !RESERVED.includes(prop)
@@ -56,6 +63,7 @@ exports.transitionTo = function transitionTo(...params) {
       fn.apply(this, args);
       this[STATE] = this[STATES][stateName];
       this[CURRENT_STATE_NAME] = stateName;
+      this[ON_STATE_TRANSITION]();
     };
   }
 
@@ -65,6 +73,7 @@ exports.transitionTo = function transitionTo(...params) {
       const nextState = fn.apply(this, args);
       this[STATE] = this[STATES][nextState];
       this[CURRENT_STATE_NAME] = nextState;
+      this[ON_STATE_TRANSITION]();
     };
   }
 

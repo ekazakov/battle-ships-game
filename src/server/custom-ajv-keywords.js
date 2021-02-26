@@ -1,4 +1,4 @@
-const { isUserWithNameExists } = require("./model");
+const { isUserWithNameExists } = require("./user-store");
 
 function checkLogin(schema, data) {
   // console.log("schema", schema);

@@ -1,8 +1,6 @@
 const usersByName = new Map();
 const usersById = new Map();
 
-const gmaes = new Map();
-
 function isUserWithNameExists(name) {
   return usersByName.has(name);
 }
@@ -31,10 +29,16 @@ function registerUser(user) {
   usersById.set(id, user);
 }
 
+function resetUsers() {
+  usersByName.clear();
+  usersById.clear();
+}
+
 module.exports = {
   isUserWithNameExists,
   isUserWithIdExists,
   getUserById,
   getUserByName,
-  registerUser
+  registerUser,
+  resetUsers
 };
