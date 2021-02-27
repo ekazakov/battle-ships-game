@@ -1,3 +1,5 @@
+const { getGameById } = require("../game-store");
+const { getGamesList } = require("../game-store");
 const { getUserById } = require("../user-store");
 const { getUserIdFromCookie } = require("../../utils/cookie");
 const { createNewGame } = require("../game-store");
@@ -8,8 +10,14 @@ function sleep(time) {
   });
 }
 
+const anAuthorizedAccessList = ["/api/game/list"];
+
 async function routes(fastify) {
   fastify.addHook("onRequest", async function (request, reply) {
+    if (anAuthorizedAccessList.includes(request.url)) {
+      return;
+    }
+
     if (!request.cookies.auth) {
       reply.code(400);
       return reply.send(new Error("User not authorized"));
@@ -19,8 +27,12 @@ async function routes(fastify) {
 
     if (!getUserById(userId)) {
       reply.code(400);
-      return reply.send(new Error("User doesn't exists"));
+      return reply.send(new Error("User doesn't exist"));
     }
+  });
+
+  fastify.get("/api/game/list", () => {
+    return getGamesList();
   });
 
   fastify.post("/api/game/create", async (request) => {
@@ -30,7 +42,18 @@ async function routes(fastify) {
   });
 
   fastify.post("/api/game/:id/join", async (request, reply) => {
-    return { a: 2 };
+    try {
+      const userId = getUserIdFromCookie(request.cookies.auth);
+      const user = getUserById(userId);
+      const { id } = request.params;
+      const game = getGameById(id);
+
+      game.join(user);
+    } catch (e) {
+      console.error(e);
+    }
+    reply.code(204);
+    return reply.send();
   });
 
   fastify.post("/api/game/:id/leave", async (request, reply) => {

@@ -45,7 +45,7 @@ exports.StateMachine = function StateMachine(description) {
         handler.apply(this, args);
       } else {
         throw new Error(
-          `event: ${eventName} is not supported in state: ${STATE}`
+          `event: ${eventName} is not supported in state: ${machine[CURRENT_STATE_NAME]}`
         );
       }
     };

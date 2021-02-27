@@ -1,4 +1,4 @@
-const getNextId = require("../common/id-generator");
+const { getNextId } = require("../common/id-generator");
 
 module.exports = class User {
   constructor(name, password) {
@@ -22,6 +22,10 @@ module.exports = class User {
 
   getGameId() {
     return this._gameId;
+  }
+
+  getInfo() {
+    return { name: this.getName(), id: this.getId() };
   }
 
   isLoginAndPasswordValid(name, password) {

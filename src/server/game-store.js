@@ -16,9 +16,21 @@ function createNewGame(userId) {
   return game;
 }
 
-function getGameById() {}
+function getGameById(id) {
+  return games.get(id);
+}
 
 function getGameByUserId() {}
+
+function getGamesList() {
+  return [...games.values()].map((game) => {
+    return {
+      id: game.getId(),
+      owner: game.getOwnerInfo(),
+      state: game.getState()
+    };
+  });
+}
 
 function resetGamesStore() {
   games.clear();
@@ -28,5 +40,6 @@ module.exports = {
   createNewGame,
   getGameById,
   getGameByUserId,
-  resetGamesStore
+  resetGamesStore,
+  getGamesList
 };
