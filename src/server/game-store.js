@@ -23,13 +23,7 @@ function getGameById(id) {
 function getGameByUserId() {}
 
 function getGamesList() {
-  return [...games.values()].map((game) => {
-    return {
-      id: game.getId(),
-      owner: game.getOwnerInfo(),
-      state: game.getState()
-    };
-  });
+  return [...games.values()].map((game) => game.getInfo());
 }
 
 function resetGamesStore() {

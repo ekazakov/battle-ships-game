@@ -109,7 +109,15 @@ exports.Game = class Game extends Observer {
   }
 
   getOwnerInfo() {
-    return this._owner.getInfo();
+    return this._owner?.getInfo() ?? null;
+  }
+
+  getInfo() {
+    return {
+      id: this.getId(),
+      owner: this.getOwnerInfo(),
+      state: this.getState()
+    };
   }
 
   getState() {
@@ -125,12 +133,18 @@ exports.Game = class Game extends Observer {
   }
 
   join(player) {
+    const { playerA, playerB } = this._machine;
+    if (player === playerA || player === playerB) {
+      return;
+    }
+
     this._machine.join(player);
   }
 
   leave(player) {
     if (player === this._owner) {
       this._machine.destroy();
+      this._owner = null;
     } else {
       this._machine.leave(player);
     }
