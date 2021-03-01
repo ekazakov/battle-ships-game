@@ -1,77 +1,12 @@
-// const EventSource = require("eventsource");
+const {
+  leaveGame,
+  startGame,
+  joinGame,
+  createGame,
+  registerUser
+} = require("../../../test-helpers/game-actions");
 const { buildAuthCookie } = require("../../../utils/cookie");
-const { parseAuthCookie } = require("../../../utils/cookie");
 const { buildFastify } = require("../../app");
-
-// const createUrl = (port, id) =>
-//   `http://localhost:${port}/api/game/${id}/subscribe`;
-
-async function registerUser(fastify, { login, password }) {
-  const res = await fastify.inject({
-    method: "POST",
-    url: "/api/register",
-    payload: { login, password }
-  });
-
-  if (res.statusCode !== 204 && res.statusCode !== 200) {
-    throw new Error(res.json().message);
-  }
-  return parseAuthCookie(res.headers["set-cookie"]).id;
-}
-
-async function createGame(fastify, userId) {
-  const res = await fastify.inject({
-    method: "POST",
-    url: "/api/game/create",
-    headers: {
-      cookie: buildAuthCookie(userId)
-    }
-  });
-
-  return res.json();
-}
-
-async function joinGame(fastify, userId, gameId) {
-  const res = await fastify.inject({
-    method: "POST",
-    url: `/api/game/${gameId}/join`,
-    headers: {
-      cookie: buildAuthCookie(userId)
-    }
-  });
-
-  if (res.statusCode !== 204 && res.statusCode !== 200) {
-    throw new Error(res.json().message);
-  }
-
-  return res;
-}
-
-async function startGame(fastify, userId, gameId) {
-  const res = await fastify.inject({
-    method: "POST",
-    url: `/api/game/${gameId}/start`,
-    headers: {
-      cookie: buildAuthCookie(userId)
-    }
-  });
-
-  if (res.statusCode !== 204 && res.statusCode !== 200) {
-    throw new Error(res.json().message);
-  }
-
-  return res;
-}
-
-async function getGame(fastify, userId, gameId) {
-  return await fastify.inject({
-    method: "GET",
-    url: `/api/game/${gameId}`,
-    headers: {
-      cookie: buildAuthCookie(userId)
-    }
-  });
-}
 
 describe("Game API", () => {
   let fastify = null;
@@ -446,16 +381,144 @@ describe("Game API", () => {
         state: "destroyed"
       });
     });
-    it("should leave not started game", async () => {});
+    it("should leave not started game", async () => {
+      const res = await fastify.inject({
+        method: "POST",
+        url: `api/game/${game.id}/leave`,
+        headers: {
+          cookie: buildAuthCookie(bUserId)
+        }
+      });
 
-    it("should return error if leaving not existing game", async () => {});
-    it("should rejoin game after second player left", async () => {});
+      expect(res.statusCode).toBe(200);
+      expect(res.json()).toEqual({
+        id: "game_1",
+        owner: {
+          id: "user_1",
+          name: "UserA"
+        },
+        state: "awaiting"
+      });
+    });
+
+    it("should return error if leaving not existing game", async () => {
+      const res = await fastify.inject({
+        method: "POST",
+        url: "api/game/dummy_game_1/leave",
+        headers: {
+          cookie: buildAuthCookie(bUserId)
+        }
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.json()).toEqual({
+        error: "Bad Request",
+        message: "Game doesn't exist",
+        statusCode: 400
+      });
+    });
+
+    describe("Rejoin after leave", () => {
+      beforeEach(async () => {
+        await leaveGame(fastify, bUserId, game.id);
+      });
+
+      it("should rejoin game after second player left", async () => {
+        const res = await joinGame(fastify, bUserId, game.id);
+        expect(res.statusCode).toBe(200);
+        expect(res.json()).toEqual({
+          id: "game_1",
+          owner: {
+            id: "user_1",
+            name: "UserA"
+          },
+          state: "awaitingStart"
+        });
+      });
+    });
 
     describe("Leave started game", () => {
-      it("should leave started game", async () => {});
+      beforeEach(async () => {
+        await startGame(fastify, aUserId, game.id);
+      });
+      it("should leave started game", async () => {
+        const res = await fastify.inject({
+          method: "POST",
+          url: `api/game/${game.id}/leave`,
+          headers: {
+            cookie: buildAuthCookie(bUserId)
+          }
+        });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.json()).toEqual({
+          id: "game_1",
+          owner: null,
+          state: "destroyed"
+        });
+      });
     });
   });
 
+  describe("Make turn", () => {
+    let aUserId = null;
+    let bUserId = null;
+    let game = null;
+
+    beforeEach(async () => {
+      aUserId = await registerUser(fastify, {
+        login: "UserA",
+        password: "password"
+      });
+      bUserId = await registerUser(fastify, {
+        login: "UserB",
+        password: "password"
+      });
+
+      game = await createGame(fastify, aUserId);
+      await joinGame(fastify, bUserId, game.id);
+      await startGame(fastify, bUserId, game.id);
+    });
+
+    it("should make turn by PlayerA", async () => {
+      const res = await fastify.inject({
+        method: "POST",
+        url: `/api/game/${game.id}/turn`,
+        headers: {
+          cookie: buildAuthCookie(aUserId)
+        },
+        body: { x: 0, y: 0 }
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.json()).toEqual({
+        id: "game_1",
+        owner: {
+          id: "user_1",
+          name: "UserA"
+        },
+        state: "playerTurn"
+      });
+    });
+
+    it("should return error if other player turn", async () => {
+      const res = await fastify.inject({
+        method: "POST",
+        url: `/api/game/${game.id}/turn`,
+        headers: {
+          cookie: buildAuthCookie(bUserId)
+        },
+        body: { x: 0, y: 0 }
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.json()).toEqual({
+        error: "Bad Request",
+        message: "Player can't act during other player turn",
+        statusCode: 400
+      });
+    });
+  });
   // it("One", (done) => {
   //   fastify.listen(0, () => {
   //     const port = fastify.server.address().port;

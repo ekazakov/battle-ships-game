@@ -46,7 +46,8 @@ function createGame() {
           this.playerB = playerB;
           this.boards.set(playerB, new Board());
         }),
-        destroy: transitionTo(States.DESTROYED, function () {})
+        destroy: transitionTo(States.DESTROYED, function () {}),
+        leave: transitionTo(States.DESTROYED, function () {})
       },
       [States.AWAITING_START]: {
         leave: transitionTo(States.AWAITING_PLAYER, function (player) {
@@ -84,7 +85,8 @@ function createGame() {
 
           return States.PLAYER_TURN;
         }),
-        destroy: transitionTo(States.DESTROYED, function () {})
+        destroy: transitionTo(States.DESTROYED, function () {}),
+        leave: transitionTo(States.DESTROYED, function () {})
       },
       [States.FINISHED]: {},
       [States.DESTROYED]: {}
@@ -147,6 +149,9 @@ exports.Game = class Game extends Observer {
       this._owner = null;
     } else {
       this._machine.leave(player);
+      if (this.getState() === States.DESTROYED) {
+        this._owner = null;
+      }
     }
   }
 

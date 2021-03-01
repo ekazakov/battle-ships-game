@@ -4,12 +4,6 @@ const { getUserById } = require("../user-store");
 const { getUserIdFromCookie } = require("../../utils/cookie");
 const { createNewGame } = require("../game-store");
 
-function sleep(time) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, time);
-  });
-}
-
 const anAuthorizedAccessList = ["/api/game/list"];
 
 async function routes(fastify) {
@@ -119,15 +113,68 @@ async function routes(fastify) {
     }
   });
 
+  fastify.post("/api/game/:id/turn", async (request, reply) => {
+    try {
+      const userId = getUserIdFromCookie(request.cookies.auth);
+      const user = getUserById(userId);
+      const {
+        params: { id },
+        body: target
+      } = request;
+
+      const game = getGameById(id);
+
+      if (!game) {
+        reply.code(400);
+        return reply.send(new Error("Game doesn't exist"));
+      }
+
+      game.makeShot(user, target);
+      reply.code(200);
+      return game.getInfo();
+    } catch (e) {
+      console.error(e);
+      reply.code(400);
+      return reply.send(e);
+    }
+  });
+
   fastify.get("/api/game/:id/subscribe", (request, reply) => {
-    reply.sse(
-      (async function* source() {
-        for (let i = 0; i < 3; i++) {
-          await sleep(10);
-          yield { data: `Some message: ${i}` };
-        }
-      })()
-    );
+    try {
+      const {
+        params: { id }
+      } = request;
+
+      const game = getGameById(id);
+
+      if (!game) {
+        reply.code(400);
+        return reply.send(new Error("Game doesn't exist"));
+      }
+
+      reply.sse(
+        (async function* source() {
+          yield { data: JSON.stringify(game.getGameState()) };
+          const gameState = await new Promise((resolve, reject) => {
+            try {
+              const foo = (event, payload) => {
+                resolve(payload);
+              };
+              game.addObserver(foo);
+              game.removeObserver(foo);
+            } catch (error) {
+              reject(error);
+            }
+          });
+          yield { data: gameState };
+          yield { data: "Done" };
+        })()
+      );
+    } catch (e) {
+      console.error(e);
+      reply.code(400);
+      return reply.send(e);
+    }
   });
 }
 
