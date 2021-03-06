@@ -30,10 +30,25 @@ function resetGamesStore() {
   games.clear();
 }
 
+function nextGameState(game) {
+  return new Promise((resolve, reject) => {
+    try {
+      const observer = (event, payload) => {
+        resolve(payload);
+        game.removeObserver(observer);
+      };
+      game.addObserver(observer);
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
 module.exports = {
   createNewGame,
   getGameById,
   getGameByUserId,
   resetGamesStore,
-  getGamesList
+  getGamesList,
+  nextGameState
 };

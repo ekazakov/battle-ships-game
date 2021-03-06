@@ -1,3 +1,4 @@
+const { nextGameState } = require("../game-store");
 const { getGameById } = require("../game-store");
 const { getGamesList } = require("../game-store");
 const { getUserById } = require("../user-store");
@@ -154,20 +155,17 @@ async function routes(fastify) {
 
       reply.sse(
         (async function* source() {
-          yield { data: JSON.stringify(game.getGameState()) };
-          const gameState = await new Promise((resolve, reject) => {
-            try {
-              const foo = (event, payload) => {
-                resolve(payload);
-              };
-              game.addObserver(foo);
-              game.removeObserver(foo);
-            } catch (error) {
-              reject(error);
-            }
-          });
-          yield { data: gameState };
-          yield { data: "Done" };
+          const evt1 = { data: JSON.stringify(game.getGameState()) };
+          yield evt1;
+
+          while (!game.isOver()) {
+            const gameState = await nextGameState(game);
+            const evt = { data: JSON.stringify(gameState) };
+            console.log("evt:", evt);
+            yield evt;
+          }
+
+          console.log("DONE");
         })()
       );
     } catch (e) {

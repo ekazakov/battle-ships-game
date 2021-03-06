@@ -126,6 +126,13 @@ exports.Game = class Game extends Observer {
     return getState(this._machine);
   }
 
+  isOver() {
+    return (
+      this.getGameState() === States.DESTROYED ||
+      this.getGameState() === States.FINISHED
+    );
+  }
+
   initialize() {
     this._machine.initialize(this._owner);
   }
@@ -185,6 +192,7 @@ exports.Game = class Game extends Observer {
       waitingBoard?.isAllShipsDestroyed() ?? false ? current.getId() : null;
 
     return {
+      id: this.getId(),
       state: this.getState(),
       winnerId,
       current: current?.getInfo() ?? null,

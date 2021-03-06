@@ -47,13 +47,14 @@ exports.joinGame = async function joinGame(fastify, userId, gameId) {
 exports.leaveGame = async function leaveGame(fastify, userId, gameId) {
   const res = await fastify.inject({
     method: "POST",
-    url: `/api/game/${gameId}/join`,
+    url: `/api/game/${gameId}/leave`,
     headers: {
       cookie: buildAuthCookie(userId)
     }
   });
 
   if (res.statusCode !== 200) {
+    console.error(res.json().message);
     throw new Error(res.json().message);
   }
 
@@ -67,6 +68,23 @@ exports.startGame = async function startGame(fastify, userId, gameId) {
     headers: {
       cookie: buildAuthCookie(userId)
     }
+  });
+
+  if (res.statusCode !== 204 && res.statusCode !== 200) {
+    throw new Error(res.json().message);
+  }
+
+  return res;
+};
+
+exports.makeTurn = async function makeTurn(fastify, userId, gameId, target) {
+  const res = await fastify.inject({
+    method: "POST",
+    url: `/api/game/${gameId}/turn`,
+    headers: {
+      cookie: buildAuthCookie(userId)
+    },
+    payload: target
   });
 
   if (res.statusCode !== 204 && res.statusCode !== 200) {
