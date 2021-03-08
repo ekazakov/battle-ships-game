@@ -1,10 +1,13 @@
 import React from "react";
+import { AuthForm } from "./login-form";
 
-function App() {
-  return <div>Hello App</div>;
+export function App() {
+  return (
+    <div>
+      <AuthForm />
+    </div>
+  );
 }
-
-module.exports = App;
 
 window.register = async function (login, password = "pwd1") {
   const data = { login, password };

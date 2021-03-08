@@ -115,7 +115,30 @@ describe("Game API: Subscription", () => {
       }
     });
   });
-  it("should send message when game started", async () => {});
+
+  it("should send message when game started", async () => {
+    await joinGame(fastify, bUserId, game.id);
+    await nextEvent(subscription);
+
+    const [evt] = await Promise.all([
+      nextEvent(subscription),
+      startGame(fastify, aUserId, game.id)
+    ]);
+
+    expect(evt.data).toMatchSnapshot({
+      id: "game_1",
+      waiting: {
+        id: "user_2",
+        name: "UserB"
+      },
+      state: "playerTurn",
+      current: {
+        id: "user_1",
+        name: "UserA"
+      },
+      winnerId: null
+    });
+  });
 
   it("should send message when game destroyed", async () => {
     await nextEvent(subscription);
@@ -135,7 +158,31 @@ describe("Game API: Subscription", () => {
       }
     });
   });
-  it("should send message when user make a turn", async () => {});
+
+  it("should send message when user make a turn", async () => {
+    await joinGame(fastify, bUserId, game.id);
+    await startGame(fastify, aUserId, game.id);
+    await nextEvent(subscription);
+
+    const [evt2] = await Promise.all([
+      nextEvent(subscription),
+      makeTurn(fastify, aUserId, game.id, { x: 1, y: 1 })
+    ]);
+
+    expect(evt2.data).toMatchSnapshot({
+      id: "game_1",
+      current: {
+        id: "user_2",
+        name: "UserB"
+      },
+      state: "playerTurn",
+      waiting: {
+        id: "user_1",
+        name: "UserA"
+      },
+      winnerId: null
+    });
+  });
 
   it("should not send message when user request errored", async () => {
     await nextEvent(subscription);

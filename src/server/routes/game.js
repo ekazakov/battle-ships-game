@@ -1,3 +1,4 @@
+const { authCheck } = require("../../utils/auth-check");
 const { nextGameState } = require("../game-store");
 const { getGameById } = require("../game-store");
 const { getGamesList } = require("../game-store");
@@ -13,16 +14,10 @@ async function routes(fastify) {
       return;
     }
 
-    if (!request.cookies.auth) {
-      reply.code(400);
-      return reply.send(new Error("User not authorized"));
-    }
-
-    const userId = getUserIdFromCookie(request.cookies.auth);
-
-    if (!getUserById(userId)) {
-      reply.code(400);
-      return reply.send(new Error("User doesn't exist"));
+    const result = authCheck(request);
+    if (result.code !== 204) {
+      reply.code(result.code);
+      return reply.send(result.error);
     }
   });
 
@@ -161,11 +156,9 @@ async function routes(fastify) {
           while (!game.isOver()) {
             const gameState = await nextGameState(game);
             const evt = { data: JSON.stringify(gameState) };
-            console.log("evt:", evt);
+            // console.log("evt:", evt);
             yield evt;
           }
-
-          console.log("DONE");
         })()
       );
     } catch (e) {

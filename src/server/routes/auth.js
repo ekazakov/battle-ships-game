@@ -4,6 +4,7 @@ const {
   registerUser
 } = require("../user-store");
 const User = require("../user");
+const { authCheck } = require("../../utils/auth-check");
 
 const passwordScheme = {
   password: { type: "string", minLength: 5, maxLength: 50 }
@@ -71,6 +72,12 @@ async function routes(fastify) {
   fastify.post("/api/logout", async (request, reply) => {
     reply.clearCookie("auth");
     reply.code(204);
+  });
+
+  fastify.get("/api/auth_check", async (request, reply) => {
+    const result = authCheck(request);
+    reply.code(result.code);
+    return reply.send(result.error);
   });
 }
 
