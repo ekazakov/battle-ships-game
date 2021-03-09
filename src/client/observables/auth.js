@@ -28,14 +28,17 @@ function login(body) {
     body: JSON.stringify(body)
   })
     .then((response) =>
-      response.json().then((data) => {
+      response.json().then(() => {
         if (response.ok) {
           subject.next({
             status: "success",
             value: AuthStatus.AUTHORIZED
           });
         } else {
-          throw data;
+          subject.next({
+            status: "success",
+            value: AuthStatus.UNAUTHORIZED
+          });
         }
       })
     )
@@ -59,14 +62,17 @@ function register(body) {
     body: JSON.stringify(body)
   })
     .then((response) =>
-      response.json().then((data) => {
+      response.json().then(() => {
         if (response.ok) {
           subject.next({
             status: "success",
             value: AuthStatus.AUTHORIZED
           });
         } else {
-          throw data;
+          subject.next({
+            status: "success",
+            value: AuthStatus.UNAUTHORIZED
+          });
         }
       })
     )
@@ -84,10 +90,7 @@ function logout() {
     status: "loading",
     value: null
   });
-  fetch("/api/register", { method: "POST" })
-    .then((response) => {
-      return response.json();
-    })
+  fetch("/api/logout", { method: "POST" })
     .then(() => {
       subject.next({
         value: AuthStatus.UNAUTHORIZED,
@@ -118,7 +121,7 @@ function checkAuth() {
       } else {
         subject.next({
           value: AuthStatus.UNAUTHORIZED,
-          status: "failure"
+          status: "success"
         });
       }
     })
