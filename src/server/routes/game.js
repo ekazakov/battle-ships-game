@@ -20,7 +20,7 @@ async function routes(fastify) {
       return reply.send(result.error);
     }
   });
-
+  // TODO: refactor routes to RESTful style
   fastify.get("/api/game/list", () => {
     return getGamesList();
   });
@@ -42,8 +42,9 @@ async function routes(fastify) {
 
   fastify.post("/api/game/create", async (request) => {
     const userId = getUserIdFromCookie(request.cookies.auth);
+    // TODO: handle exception and return 400
     const game = createNewGame(userId);
-    return { id: game.getId() };
+    return game.getGameState();
   });
 
   fastify.post("/api/game/:id/join", async (request, reply) => {

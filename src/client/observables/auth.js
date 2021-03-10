@@ -1,9 +1,9 @@
+import { BehaviorSubject } from "rxjs";
+
 export const AuthStatus = {
   UNAUTHORIZED: "UNAUTHORIZED",
   AUTHORIZED: "AUTHORIZED"
 };
-
-import { BehaviorSubject } from "rxjs";
 
 const subject = new BehaviorSubject({
   status: "idle",

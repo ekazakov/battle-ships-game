@@ -33,9 +33,6 @@ export function App() {
 
         <ul>
           <li>
-            <NavLink to="/profile">Profile</NavLink>
-          </li>
-          <li>
             <NavLink to="/game-list">Games</NavLink>
           </li>
 

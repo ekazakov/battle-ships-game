@@ -10,6 +10,7 @@ export function LogoutButton() {
   const loading = authState.status === "loading";
   return (
     <div>
+      User: <b></b>
       <button type="button" disabled={loading} onClick={onClick}>
         Logout
       </button>
