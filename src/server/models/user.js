@@ -1,6 +1,6 @@
-const { getNextId } = require("../common/id-generator");
+const { getNextId } = require("../utils/id-generator");
 
-module.exports = class User {
+exports.User = class User {
   constructor(name, password) {
     this._name = name;
     this._password = password;

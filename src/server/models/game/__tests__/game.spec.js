@@ -1,5 +1,6 @@
-const { Direction } = require("../constants");
-const { Game, States } = require("../game");
+const { resetIds } = require("../../../utils/id-generator");
+const { Direction } = require("../../../../common/constants");
+const { Game, States } = require("../index");
 
 function createPlayer(id) {
   return {
@@ -14,6 +15,8 @@ function createPlayer(id) {
 }
 
 describe("Game", function () {
+  beforeEach(() => resetIds());
+
   describe("getId", () => {
     let game = null;
     beforeEach(() => {
@@ -21,7 +24,7 @@ describe("Game", function () {
     });
 
     it("should return game id", () => {
-      expect(game.getId()).toEqual(expect.any(Number));
+      expect(game.getId()).toEqual(expect.any(String));
     });
   });
 
@@ -40,33 +43,24 @@ describe("Game", function () {
       playerA = null;
       playerB = null;
     });
+    //TODO: add test for game.addObserver
 
-    it("should be in IDLE state", () => {
+    it("should be in AWAITING_PLAYER after creation", () => {
       expect.hasAssertions();
-      expect(game.getState()).toBe(States.IDLE);
-    });
-
-    it("should be in AWAITING_PLAYER after initialization", () => {
-      expect.hasAssertions();
-      const fn = jest.fn();
-      game.addObserver(fn);
-      game.initialize();
 
       expect(game.getState()).toBe(States.AWAITING_PLAYER);
-      expect(fn).toHaveBeenCalled();
     });
 
     it("should be in AWAITING_START after second player joined", () => {
       expect.hasAssertions();
 
-      game.initialize();
       game.join(playerB);
       expect(game.getState()).toBe(States.AWAITING_START);
     });
 
     it("should transition to DESTROYED state", () => {
       expect.hasAssertions();
-      game.initialize();
+
       game.join(playerB);
       game.destroy();
 
@@ -82,7 +76,6 @@ describe("Game", function () {
       it("should be in PLAYER_A_TURN after start", () => {
         expect.hasAssertions();
 
-        game.initialize();
         game.join(playerB);
         game.start();
         expect(game.getState()).toBe(States.PLAYER_TURN);
@@ -90,7 +83,6 @@ describe("Game", function () {
 
       it("should be in AWAITING_PLAYER after second player leave", () => {
         expect.hasAssertions();
-        game.initialize();
         game.join(playerB);
         game.leave(playerB);
         expect(game.getState()).toBe(States.AWAITING_PLAYER);
@@ -98,7 +90,6 @@ describe("Game", function () {
 
       it("should be in DESTROYED after owner player leave", () => {
         expect.hasAssertions();
-        game.initialize();
         game.join(playerB);
         game.leave(playerA);
         expect(game.getState()).toBe(States.DESTROYED);
@@ -108,7 +99,6 @@ describe("Game", function () {
     describe("MAKE_TURN", () => {
       it("should hit other player ship and continue current player turn", () => {
         expect.hasAssertions();
-        game.initialize();
         game.join(playerB);
         game.start();
         game.makeShot(playerA, { x: 6, y: 0 });
@@ -122,7 +112,6 @@ describe("Game", function () {
 
       it("should switch player on miss", () => {
         expect.hasAssertions();
-        game.initialize();
         game.join(playerB);
         game.start();
         game.makeShot(playerA, { x: 5, y: 0 });
@@ -136,7 +125,6 @@ describe("Game", function () {
 
       it("should throw error if waiting player attempts make turn", () => {
         expect.hasAssertions();
-        game.initialize();
         game.join(playerB);
         game.start();
         game.makeShot(playerA, { x: 5, y: 0 });
@@ -145,7 +133,6 @@ describe("Game", function () {
 
       it("should keep player turn on shooting at the hit cell", () => {
         expect.hasAssertions();
-        game.initialize();
         game.join(playerB);
         game.start();
         game.makeShot(playerA, { x: 6, y: 0 });
@@ -224,7 +211,6 @@ describe("Game", function () {
         ];
 
         expect.hasAssertions();
-        game.initialize();
         game.join(playerB);
         game.start();
 

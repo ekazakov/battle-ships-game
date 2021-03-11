@@ -4,11 +4,11 @@ const {
   getState,
   STATES,
   STARTING_STATE
-} = require("../common/state-machine");
-const { getNextId } = require("./id-generator");
-const { Observer } = require("./observer");
+} = require("../../../common/state-machine");
+const { getNextId } = require("../../utils/id-generator");
+const { Observer } = require("../../../common/observer");
 const { Board } = require("./board");
-const { ShootResult } = require("./constants.js");
+const { ShootResult } = require("../../../common/constants.js");
 
 const States = {
   IDLE: "idle",

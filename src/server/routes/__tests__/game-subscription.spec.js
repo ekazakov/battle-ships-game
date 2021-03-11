@@ -6,8 +6,8 @@ const {
   joinGame,
   createGame,
   registerUser
-} = require("../../../test-helpers/game-actions");
-const { buildAuthCookie } = require("../../../utils/cookie");
+} = require("../../test-helpers/game-actions");
+const { buildAuthCookie } = require("../../utils/cookie");
 const { buildFastify } = require("../../app");
 
 const createUrl = (port, id) =>

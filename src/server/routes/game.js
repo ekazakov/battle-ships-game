@@ -1,10 +1,10 @@
-const { authCheck } = require("../../utils/auth-check");
-const { nextGameState } = require("../game-store");
-const { getGameById } = require("../game-store");
-const { getGamesList } = require("../game-store");
-const { getUserById } = require("../user-store");
-const { getUserIdFromCookie } = require("../../utils/cookie");
-const { createNewGame } = require("../game-store");
+const { authCheck } = require("../utils/auth-check");
+const { nextGameState } = require("../services/game");
+const { getGameById } = require("../services/game");
+const { getGamesList } = require("../services/game");
+const { getUserById } = require("../services/user");
+const { getUserIdFromCookie } = require("../utils/cookie");
+const { createNewGame } = require("../services/game");
 
 const anAuthorizedAccessList = ["/api/game/list"];
 
@@ -14,20 +14,21 @@ async function routes(fastify) {
       return;
     }
 
-    const result = authCheck(request);
+    const result = await authCheck(request);
     if (result.code !== 204) {
       reply.code(result.code);
       return reply.send(result.error);
     }
   });
+
   // TODO: refactor routes to RESTful style
-  fastify.get("/api/game/list", () => {
-    return getGamesList();
+  fastify.get("/api/game/list", async () => {
+    return await getGamesList();
   });
 
-  fastify.get("/api/game/:id", (request, reply) => {
+  fastify.get("/api/game/:id", async (request, reply) => {
     try {
-      const game = getGameById(request.params.id);
+      const game = await getGameById(request.params.id);
 
       if (!game) {
         reply.code(404);
@@ -43,16 +44,16 @@ async function routes(fastify) {
   fastify.post("/api/game/create", async (request) => {
     const userId = getUserIdFromCookie(request.cookies.auth);
     // TODO: handle exception and return 400
-    const game = createNewGame(userId);
+    const game = await createNewGame(userId);
     return game.getGameState();
   });
 
   fastify.post("/api/game/:id/join", async (request, reply) => {
     try {
       const userId = getUserIdFromCookie(request.cookies.auth);
-      const user = getUserById(userId);
+      const user = await getUserById(userId);
       const { id } = request.params;
-      const game = getGameById(id);
+      const game = await getGameById(id);
 
       if (!game) {
         reply.code(400);
@@ -71,7 +72,7 @@ async function routes(fastify) {
 
   fastify.post("/api/game/:id/start", async (request, reply) => {
     try {
-      const game = getGameById(request.params.id);
+      const game = await getGameById(request.params.id);
 
       if (!game) {
         reply.code(400);
@@ -91,9 +92,9 @@ async function routes(fastify) {
   fastify.post("/api/game/:id/leave", async (request, reply) => {
     try {
       const userId = getUserIdFromCookie(request.cookies.auth);
-      const user = getUserById(userId);
+      const user = await getUserById(userId);
       const { id } = request.params;
-      const game = getGameById(id);
+      const game = await getGameById(id);
 
       if (!game) {
         reply.code(400);
@@ -113,13 +114,13 @@ async function routes(fastify) {
   fastify.post("/api/game/:id/turn", async (request, reply) => {
     try {
       const userId = getUserIdFromCookie(request.cookies.auth);
-      const user = getUserById(userId);
+      const user = await getUserById(userId);
       const {
         params: { id },
         body: target
       } = request;
 
-      const game = getGameById(id);
+      const game = await getGameById(id);
 
       if (!game) {
         reply.code(400);
@@ -136,13 +137,13 @@ async function routes(fastify) {
     }
   });
 
-  fastify.get("/api/game/:id/subscribe", (request, reply) => {
+  fastify.get("/api/game/:id/subscribe", async (request, reply) => {
     try {
       const {
         params: { id }
       } = request;
 
-      const game = getGameById(id);
+      const game = await getGameById(id);
 
       if (!game) {
         reply.code(400);

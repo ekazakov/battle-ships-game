@@ -4,8 +4,8 @@ const {
   joinGame,
   createGame,
   registerUser
-} = require("../../../test-helpers/game-actions");
-const { buildAuthCookie } = require("../../../utils/cookie");
+} = require("../../test-helpers/game-actions");
+const { buildAuthCookie } = require("../../utils/cookie");
 const { buildFastify } = require("../../app");
 
 describe("Game API", () => {
@@ -42,7 +42,13 @@ describe("Game API", () => {
 
       expect(res.statusCode).toBe(200);
       expect(res.json()).toEqual({
-        id: "game_1"
+        current: null,
+        enemyBoard: null,
+        id: "game_1",
+        ownBoard: null,
+        state: "awaiting",
+        waiting: null,
+        winnerId: null
       });
     });
 

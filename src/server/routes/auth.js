@@ -2,9 +2,8 @@ const {
   isUserWithNameExists,
   getUserByName,
   registerUser
-} = require("../user-store");
-const User = require("../user");
-const { authCheck } = require("../../utils/auth-check");
+} = require("../services/user");
+const { authCheck } = require("../utils/auth-check");
 
 const passwordScheme = {
   password: { type: "string", minLength: 5, maxLength: 50 }
@@ -24,10 +23,10 @@ const registrationSchema = {
   required: ["login", "password"],
   properties: {
     login: {
-      ...loginProps,
-      uniqueLogin: true
+      ...loginProps
+      // uniqueLogin: true
     },
-    ...passwordScheme
+    password: { type: "string", minLength: 5, maxLength: 50 }
   }
 };
 
@@ -42,10 +41,15 @@ async function routes(fastify) {
     async (request, reply) => {
       // console.log("body:", request.body);
       const { login, password } = request.body;
-
-      const user = new User(login, password);
-      registerUser(user);
-      reply.setCookie(...createAuthCookie(user));
+      try {
+        const user = await registerUser({ login, password });
+        //new User(login, password);
+        // registerUser({ login, password });
+        reply.setCookie(...createAuthCookie(user));
+      } catch (error) {
+        reply.code(400);
+        return reply.send(error);
+      }
       return { result: "success" };
     }
   );
@@ -56,16 +60,23 @@ async function routes(fastify) {
     async (request, reply) => {
       const { login, password } = request.body;
 
-      if (isUserWithNameExists(login)) {
-        const user = getUserByName(login);
-        if (user.isLoginAndPasswordValid(login, password)) {
-          reply.setCookie(...createAuthCookie(user));
-          return { result: "success" };
+      try {
+        if (await isUserWithNameExists(login)) {
+          const user = await getUserByName(login);
+          if (user.isLoginAndPasswordValid(login, password)) {
+            reply.setCookie(...createAuthCookie(user));
+            return { result: "success" };
+          }
         }
+        reply.code(400);
+        return {
+          error: "Bad Request",
+          message: "Login or password are invalid"
+        };
+      } catch (error) {
+        reply.code(400);
+        return reply.send(error);
       }
-
-      reply.code(400);
-      return { error: "Bad Request", message: "Login or password are invalid" };
     }
   );
 

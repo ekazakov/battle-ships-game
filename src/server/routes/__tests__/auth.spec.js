@@ -1,5 +1,5 @@
-const { buildAuthCookie } = require("../../../utils/cookie");
-const { parseAuthCookie } = require("../../../utils/cookie");
+const { buildAuthCookie } = require("../../utils/cookie");
+const { parseAuthCookie } = require("../../utils/cookie");
 const { buildFastify } = require("../../app");
 
 describe("Auth API", () => {
@@ -47,13 +47,13 @@ describe("Auth API", () => {
         const res = await fastify.inject({
           method: "POST",
           url: "/api/register",
-          payload: { login: "UserA" }
+          payload: { login: "UserA", password: "password" }
         });
 
         expect(res.statusCode).toBe(400);
         expect(res.json()).toEqual({
           error: "Bad Request",
-          message: "body.login User with such login already exists",
+          message: "User with name 'UserA' already exists",
           statusCode: 400
         });
       });
@@ -78,7 +78,7 @@ describe("Auth API", () => {
       const res = await fastify.inject({
         method: "POST",
         url: "/api/register",
-        payload: { login: "UserA", password: "pwd" }
+        payload: { login: "UserA", password: "" }
       });
 
       expect(res.statusCode).toBe(400);

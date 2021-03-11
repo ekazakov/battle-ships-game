@@ -1,5 +1,9 @@
-const { ShootResult } = require("./constants");
-const { BOARD_SIZE, Direction, ShipType } = require("./constants");
+const { ShootResult } = require("../../../common/constants");
+const {
+  BOARD_SIZE,
+  Direction,
+  ShipType
+} = require("../../../common/constants");
 const { Cell } = require("./cell");
 const { Ship } = require("./ship");
 

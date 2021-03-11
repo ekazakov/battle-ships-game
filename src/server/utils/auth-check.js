@@ -1,14 +1,14 @@
-const { getUserById } = require("../server/user-store");
+const { getUserById } = require("../services/user");
 const { getUserIdFromCookie } = require("./cookie");
 
-exports.authCheck = function authCheck(request) {
+exports.authCheck = async function authCheck(request) {
   if (!request.cookies.auth) {
     return { code: 400, error: new Error("User not authorized") };
   }
 
   const userId = getUserIdFromCookie(request.cookies.auth);
-
-  if (!getUserById(userId)) {
+  const user = await getUserById(userId);
+  if (!user) {
     return { code: 400, error: new Error("User doesn't exist") };
   }
 

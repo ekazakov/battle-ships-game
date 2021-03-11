@@ -1,6 +1,6 @@
-const { getUserIdFromCookie } = require("../../utils/cookie");
-const { getUserById } = require("../user-store");
-const { authCheck } = require("../../utils/auth-check");
+const { getUserIdFromCookie } = require("../utils/cookie");
+const { getUserById } = require("../services/user");
+const { authCheck } = require("../utils/auth-check");
 
 // TODO: add tests
 async function routes(fastify) {

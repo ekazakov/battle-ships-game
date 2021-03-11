@@ -1,11 +1,11 @@
-const { isUserWithNameExists } = require("./user-store");
+const { isUserWithNameExists } = require("../services/user");
 
-function checkLogin(schema, data) {
+async function checkLogin(schema, data) {
   // console.log("schema", schema);
   // console.log("data", data);
   // console.log("parentSchema", parentSchema);
   // console.log("dataCtx", dataCtx);
-  if (isUserWithNameExists(data)) {
+  if (await isUserWithNameExists(data)) {
     checkLogin.errors = [
       {
         message: "User with such login already exists"
@@ -17,8 +17,8 @@ function checkLogin(schema, data) {
   return true;
 }
 
-function checkUser(schema, data) {
-  if (isUserWithNameExists(data)) {
+async function checkUser(schema, data) {
+  if (await isUserWithNameExists(data)) {
     return true;
   }
 
@@ -33,11 +33,13 @@ function checkUser(schema, data) {
 
 const uniqueLogin = (ajv) => {
   ajv.addKeyword("uniqueLogin", {
+    async: true,
     keyword: "uniqueLogin",
     validate: checkLogin
   });
 
   ajv.addKeyword("userExists", {
+    async: true,
     keyword: "userExists",
     validate: checkUser
   });

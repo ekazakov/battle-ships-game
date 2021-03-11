@@ -17,6 +17,8 @@
     "fastify": "^3.11.0",
     "fastify-cookie": "^5.0.0",
     "fastify-sse-v2": "2.0.3",
+    "lodash-id": "0.14.0",
+    "lowdb": "1.0.0",
     "node-fetch": "^2.6.0",
     "pino-pretty": "^4.5.0",
     "react": "^17.0.0",
