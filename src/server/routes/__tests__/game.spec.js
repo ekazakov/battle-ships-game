@@ -11,8 +11,8 @@ const { buildFastify } = require("../../app");
 describe("Game API", () => {
   let fastify = null;
 
-  beforeEach(() => {
-    fastify = buildFastify();
+  beforeEach(async () => {
+    fastify = await buildFastify();
   });
 
   afterEach(() => {

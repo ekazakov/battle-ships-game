@@ -5,8 +5,8 @@ const { buildFastify } = require("../../app");
 describe("Auth API", () => {
   describe("Registration", () => {
     let fastify = null;
-    beforeEach(() => {
-      fastify = buildFastify();
+    beforeEach(async () => {
+      fastify = await buildFastify();
     });
 
     afterEach(() => {
@@ -108,8 +108,8 @@ describe("Auth API", () => {
   describe("Login", () => {
     let fastify = null;
 
-    beforeEach(() => {
-      fastify = buildFastify();
+    beforeEach(async () => {
+      fastify = await buildFastify();
     });
 
     afterEach(() => {
@@ -182,8 +182,8 @@ describe("Auth API", () => {
   describe("Logout", () => {
     let fastify = null;
 
-    beforeEach(() => {
-      fastify = buildFastify();
+    beforeEach(async () => {
+      fastify = await buildFastify();
     });
 
     afterEach(() => {

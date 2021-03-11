@@ -48,8 +48,8 @@ function createServer(fastify) {
 describe("Game API: Subscription", () => {
   let fastify = null;
 
-  beforeEach(() => {
-    fastify = buildFastify();
+  beforeEach(async () => {
+    fastify = await buildFastify();
   });
 
   afterEach(() => {

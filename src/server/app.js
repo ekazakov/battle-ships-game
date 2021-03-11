@@ -20,9 +20,9 @@ const defaultOptions = {
   }
 };
 
-exports.buildFastify = function buildFastify(options = {}) {
+exports.buildFastify = async function buildFastify(options = {}) {
   resetIds();
-  resetStorage();
+  await resetStorage();
   const fastify = fastifyFactory(Object.assign({}, defaultOptions, options));
 
   fastify.register(FastifySSEPlugin);

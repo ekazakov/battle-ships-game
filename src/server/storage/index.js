@@ -47,7 +47,7 @@ exports.getGames = async function getGames() {
   return [...games.values()];
 };
 
-exports.resetStorage = function resetStorage() {
+exports.resetStorage = async function resetStorage() {
   games.clear();
   usersByName.clear();
   usersById.clear();

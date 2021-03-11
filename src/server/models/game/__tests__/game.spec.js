@@ -15,11 +15,11 @@ function createPlayer(id) {
 }
 
 describe("Game", function () {
-  beforeEach(() => resetIds());
+  beforeEach(async () => resetIds());
 
   describe("getId", () => {
     let game = null;
-    beforeEach(() => {
+    beforeEach(async () => {
       game = new Game({});
     });
 
@@ -32,7 +32,7 @@ describe("Game", function () {
     let game = null;
     let playerA = null;
     let playerB = null;
-    beforeEach(() => {
+    beforeEach(async () => {
       playerA = createPlayer(1);
       playerB = createPlayer(2);
       game = new Game(playerA);
