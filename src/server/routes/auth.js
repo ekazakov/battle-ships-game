@@ -39,12 +39,9 @@ async function routes(fastify) {
     "/api/register",
     { schema: { body: registrationSchema } },
     async (request, reply) => {
-      // console.log("body:", request.body);
       const { login, password } = request.body;
       try {
         const user = await registerUser({ login, password });
-        //new User(login, password);
-        // registerUser({ login, password });
         reply.setCookie(...createAuthCookie(user));
       } catch (error) {
         reply.code(400);

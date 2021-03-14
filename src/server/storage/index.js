@@ -1,54 +1,118 @@
-const games = new Map();
-const usersByName = new Map();
-const usersById = new Map();
+const low = require("lowdb");
+const lodashId = require("lodash-id");
+const FileAsync = require("lowdb/adapters/FileAsync");
+const Base = require("lowdb/adapters/Base");
+const { User } = require("../models/user");
 
-function isUserWithNameExists(name) {
-  return usersByName.has(name);
+class MemoryAsync extends Base {
+  _data = null;
+
+  read() {
+    return Promise.resolve(this._data || this.defaultValue);
+  }
+  write(data) {
+    this._data = data;
+    return Promise.resolve(data);
+  }
+}
+// const games = new Map();
+// const usersByName = new Map();
+// const usersById = new Map();
+
+async function initDb(adapter, defaultData) {
+  const db = await low(adapter);
+  db._.mixin(lodashId);
+  await db.defaults(defaultData).write();
+  return db;
 }
 
-function isUserWithIdExists(id) {
-  return usersById.has(id);
-}
-
-exports.getUserById = async function getUserById(id) {
-  return usersById.get(id);
-};
-
-exports.getUserByName = async function getUserByName(name) {
-  return usersByName.get(name);
-};
-
-exports.addUser = async function addUser(user) {
-  const name = user.getName();
-  const id = user.getId();
-
-  if (isUserWithNameExists(name) || isUserWithIdExists(id)) {
-    throw new Error(`User with name '${name}' already exists`);
+exports.Storage = class Storage {
+  static async createMemoryStore(defaultData = { users: [], games: [] }) {
+    const adapter = new MemoryAsync();
+    const db = await initDb(adapter, defaultData);
+    return new Storage(db);
   }
 
-  usersByName.set(name, user);
-  usersById.set(id, user);
-  return user;
-};
-
-exports.addGame = async function addGame(game) {
-  if (games.has(game.getId())) {
-    throw new Error(`User with id: '${game.getId()}' already exists`);
+  static async createFileStore(defaultData = { users: [], games: [] }) {
+    const adapter = new FileAsync("database.json");
+    const db = await initDb(adapter, defaultData);
+    return new Storage(db);
   }
 
-  games.set(game.getId(), game);
-};
+  constructor(db) {
+    if (!db) {
+      throw new Error("Database instance should be provided");
+    }
 
-exports.getGameById = async function getGameById(id) {
-  return games.get(id);
-};
+    this._db = db;
+  }
 
-exports.getGames = async function getGames() {
-  return [...games.values()];
-};
+  async _isUserWithNameExists(name) {
+    return (await this._db.get("users").find({ name }).value()) != null;
+  }
 
-exports.resetStorage = async function resetStorage() {
-  games.clear();
-  usersByName.clear();
-  usersById.clear();
+  async _isUserWithIdExists(id) {
+    const u = await this._db.get("users").value();
+    console.log(">> id", id);
+    console.log(">> users", u);
+    return (await this._db.get("users").find({ id }).value()) != null;
+  }
+
+  async getUserById(id) {
+    const data = await this._db.get("users").find({ id }).value();
+    return User.deserialize(data);
+  }
+
+  async getUserByName(name) {
+    const data = await this._db.get("users").find({ name }).value();
+    return User.deserialize(data);
+  }
+
+  async addUser(user) {
+    const name = user.getName();
+    const id = user.getId();
+
+    if (await this._isUserWithIdExists(id)) {
+      throw new Error(`User with id '${id}' already exists`);
+    }
+
+    if (await this._isUserWithNameExists(name)) {
+      throw new Error(`User with name '${name}' already exists`);
+    }
+
+    const userData = await this._db
+      .get("users")
+      .push(User.serialize(user))
+      .last()
+      .write();
+    console.log("Finish write");
+    return User.deserialize(userData);
+  }
+
+  async getUsers() {
+    return await this._db.get("users").map(User.deserialize).value();
+  }
+
+  async addGame(game) {
+    if (this._games.has(game.getId())) {
+      throw new Error(`Game with id: '${game.getId()}' already exists`);
+    }
+
+    this._games.set(game.getId(), game);
+    return game;
+  }
+
+  async getGameById(id) {
+    return this._games.get(id);
+  }
+
+  async getGames() {
+    return [...this._games.values()];
+  }
+
+  async resetStorage() {
+    this._games.clear();
+    this._usersByName.clear();
+    this._usersById.clear();
+  }
 };

@@ -6,7 +6,7 @@ async function isUserWithNameExists(name) {
 }
 
 async function registerUser({ login, password }) {
-  const user = new User(login, password);
+  const user = User.createUser(login, password);
   await addUser(user);
 
   return user;
