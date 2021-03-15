@@ -1,8 +1,7 @@
 exports.Cell = class Cell {
-  constructor(position) {
-    this._ship = null;
-    this._isHit = false;
-    this._position = position;
+  constructor(ship, isHit) {
+    this._ship = ship;
+    this._isHit = isHit || false;
   }
 
   addShip(ship) {
@@ -23,15 +22,10 @@ exports.Cell = class Cell {
 
   processShoot() {
     if (!this._isHit) {
-      // const { x, y } = this._position;
-      // console.log("cell > process shoot:", `(${x}, ${y})`);
       this._isHit = true;
       if (!this.isEmpty()) {
         this._ship.processShoot();
       }
     }
-    // else {
-    //   console.log("cell > process shoot: already hit");
-    // }
   }
 };

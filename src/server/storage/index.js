@@ -1,8 +1,10 @@
+const { Mutex } = require("async-mutex");
 const low = require("lowdb");
 const lodashId = require("lodash-id");
 const FileAsync = require("lowdb/adapters/FileAsync");
 const Base = require("lowdb/adapters/Base");
 const { User } = require("../models/user");
+const { Game } = require("../models/game");
 
 class MemoryAsync extends Base {
   _data = null;
@@ -45,6 +47,7 @@ exports.Storage = class Storage {
     }
 
     this._db = db;
+    this._dbMutex = new Mutex();
   }
 
   async _isUserWithNameExists(name) {
@@ -52,9 +55,6 @@ exports.Storage = class Storage {
   }
 
   async _isUserWithIdExists(id) {
-    const u = await this._db.get("users").value();
-    console.log(">> id", id);
-    console.log(">> users", u);
     return (await this._db.get("users").find({ id }).value()) != null;
   }
 
@@ -69,24 +69,30 @@ exports.Storage = class Storage {
   }
 
   async addUser(user) {
-    const name = user.getName();
-    const id = user.getId();
+    try {
+      return await this._dbMutex.runExclusive(async () => {
+        const name = user.getName();
+        const id = user.getId();
 
-    if (await this._isUserWithIdExists(id)) {
-      throw new Error(`User with id '${id}' already exists`);
+        if (await this._isUserWithIdExists(id)) {
+          throw new Error(`User with id '${id}' already exists`);
+        }
+
+        if (await this._isUserWithNameExists(name)) {
+          throw new Error(`User with name '${name}' already exists`);
+        }
+
+        return await this._db
+          .get("users")
+          .push(User.serialize(user))
+          .last()
+          .write()
+          .then(() => user);
+      });
+    } catch (error) {
+      console.error("MutexError", error);
+      throw error;
     }
-
-    if (await this._isUserWithNameExists(name)) {
-      throw new Error(`User with name '${name}' already exists`);
-    }
-
-    const userData = await this._db
-      .get("users")
-      .push(User.serialize(user))
-      .last()
-      .write();
-    console.log("Finish write");
-    return User.deserialize(userData);
   }
 
   async getUsers() {
@@ -94,25 +100,34 @@ exports.Storage = class Storage {
   }
 
   async addGame(game) {
-    if (this._games.has(game.getId())) {
-      throw new Error(`Game with id: '${game.getId()}' already exists`);
-    }
+    try {
+      return await this._dbMutex.runExclusive(async () => {
+        const storedGame = await this.getGameById(game.id);
+        if (storedGame != null) {
+          throw new Error(`Game with id: '${game.getId()}' already exists`);
+        }
 
-    this._games.set(game.getId(), game);
-    return game;
+        return await this._db
+          .get("games")
+          .push(Game.serialize(game))
+          .last()
+          .write()
+          .then(() => game);
+      });
+    } catch (error) {
+      // TODO: add logging
+      console.error("MutexError", error);
+      throw error;
+    }
   }
 
   async getGameById(id) {
-    return this._games.get(id);
+    return Game.deserialize(await this._db.get("games").find({ id }).value());
   }
 
   async getGames() {
-    return [...this._games.values()];
+    return await this._db.get("games").map(Game.deserialize).value();
   }
 
-  async resetStorage() {
-    this._games.clear();
-    this._usersByName.clear();
-    this._usersById.clear();
-  }
+  async resetStorage() {}
 };

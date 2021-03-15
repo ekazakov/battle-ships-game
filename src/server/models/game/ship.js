@@ -1,9 +1,7 @@
 exports.Ship = class Ship {
-  constructor({ size }) {
+  constructor(size) {
     this._size = size;
     this._heath = size;
-    this._position = null;
-    this._direction = null;
   }
 
   processShoot() {
@@ -14,11 +12,6 @@ exports.Ship = class Ship {
 
   isDestroyed() {
     return this._heath === 0;
-  }
-
-  setPosition(position, direction) {
-    this._position = position;
-    this._direction = direction;
   }
 
   getSize() {

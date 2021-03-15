@@ -75,16 +75,16 @@ function createCells(size) {
 
 function createShips() {
   return [
-    new Ship({ size: ShipType.BATTLE_SHIP }),
-    new Ship({ size: ShipType.DESTROYER }),
-    new Ship({ size: ShipType.DESTROYER }),
-    new Ship({ size: ShipType.FRIGATE }),
-    new Ship({ size: ShipType.FRIGATE }),
-    new Ship({ size: ShipType.FRIGATE }),
-    new Ship({ size: ShipType.BOAT }),
-    new Ship({ size: ShipType.BOAT }),
-    new Ship({ size: ShipType.BOAT }),
-    new Ship({ size: ShipType.BOAT })
+    new Ship(ShipType.BATTLE_SHIP),
+    new Ship(ShipType.DESTROYER),
+    new Ship(ShipType.DESTROYER),
+    new Ship(ShipType.FRIGATE),
+    new Ship(ShipType.FRIGATE),
+    new Ship(ShipType.FRIGATE),
+    new Ship(ShipType.BOAT),
+    new Ship(ShipType.BOAT),
+    new Ship(ShipType.BOAT),
+    new Ship(ShipType.BOAT)
   ];
 }
 
@@ -123,7 +123,7 @@ exports.Board = class Board {
     this._ships.forEach((ship, index) => {
       const { x, y, direction } = layout[index];
       const position = { x, y };
-      ship.setPosition(position, direction);
+      // ship.setPosition(position, direction);
       this._markOccupiedCells(position, direction, ship);
     });
   }

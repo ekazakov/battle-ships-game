@@ -57,13 +57,16 @@ describe("Storage", () => {
       });
     });
 
-    describe.only("List Users", () => {
+    describe("List Users", () => {
       let users = [];
       beforeEach(async () => {
         const newUser1 = new User("UserA", "password", "user_1");
-        const newUser2 = new User("UserB", "password", "user_1");
+        const newUser2 = new User("UserB", "password", "user_2");
         users = [newUser1, newUser2];
-        await Promise.all(users.map((u) => storage.addUser(u)));
+        await Promise.all([
+          storage.addUser(newUser1),
+          storage.addUser(newUser2)
+        ]);
       });
 
       afterEach(async () => {
