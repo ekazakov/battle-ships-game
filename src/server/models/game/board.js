@@ -7,59 +7,6 @@ const {
 const { Cell } = require("./cell");
 const { Ship } = require("./ship");
 
-const layout = [
-  {
-    direction: Direction.HORIZONTAL,
-    x: 6,
-    y: 0
-  },
-  {
-    direction: Direction.VERTICAL,
-    x: 3,
-    y: 0
-  },
-  {
-    direction: Direction.VERTICAL,
-    x: 1,
-    y: 4
-  },
-  {
-    direction: Direction.HORIZONTAL,
-    x: 0,
-    y: 0
-  },
-  {
-    direction: Direction.VERTICAL,
-    x: 9,
-    y: 2
-  },
-  {
-    direction: Direction.VERTICAL,
-    x: 8,
-    y: 8
-  },
-  {
-    direction: Direction.VERTICAL,
-    x: 6,
-    y: 5
-  },
-  {
-    direction: Direction.VERTICAL,
-    x: 3,
-    y: 8
-  },
-  {
-    direction: Direction.VERTICAL,
-    x: 5,
-    y: 8
-  },
-  {
-    direction: Direction.VERTICAL,
-    x: 0,
-    y: 9
-  }
-];
-
 function createCells(size) {
   const cells = new Array(size);
 
@@ -73,66 +20,42 @@ function createCells(size) {
   return cells;
 }
 
-function createShips() {
-  return [
-    new Ship(ShipType.BATTLE_SHIP),
-    new Ship(ShipType.DESTROYER),
-    new Ship(ShipType.DESTROYER),
-    new Ship(ShipType.FRIGATE),
-    new Ship(ShipType.FRIGATE),
-    new Ship(ShipType.FRIGATE),
-    new Ship(ShipType.BOAT),
-    new Ship(ShipType.BOAT),
-    new Ship(ShipType.BOAT),
-    new Ship(ShipType.BOAT)
-  ];
-}
-
-function getRandomInteger(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-// eslint-disable-next-line no-unused-vars
-function getRandomPosition(size) {
-  return {
-    x: getRandomInteger(0, size),
-    y: getRandomInteger(0, size)
-  };
-}
-
-// eslint-disable-next-line no-unused-vars
-function getRandomDirection() {
-  if (getRandomInteger(0, 1) === 0) {
-    return Direction.VERTICAL;
-  }
-
-  return Direction.HORIZONTAL;
-}
-
-// function testPostion(position, direction, ship, cells) {}
+const defaultShips = [
+  new Ship(ShipType.BATTLE_SHIP, Direction.HORIZONTAL, { x: 6, y: 0 }),
+  new Ship(ShipType.DESTROYER, Direction.VERTICAL, { x: 3, y: 0 }),
+  new Ship(ShipType.DESTROYER, Direction.HORIZONTAL, { x: 1, y: 4 }),
+  new Ship(ShipType.FRIGATE, Direction.VERTICAL, { x: 0, y: 0 }),
+  new Ship(ShipType.FRIGATE, Direction.VERTICAL, { x: 9, y: 2 }),
+  new Ship(ShipType.FRIGATE, Direction.VERTICAL, { x: 8, y: 8 }),
+  new Ship(ShipType.BOAT, Direction.VERTICAL, { x: 6, y: 5 }),
+  new Ship(ShipType.BOAT, Direction.VERTICAL, { x: 3, y: 8 }),
+  new Ship(ShipType.BOAT, Direction.VERTICAL, { x: 5, y: 8 }),
+  new Ship(ShipType.BOAT, Direction.VERTICAL, { x: 0, y: 9 })
+];
 
 exports.Board = class Board {
-  constructor({ size } = { size: BOARD_SIZE }) {
+  static createBoard(ships = defaultShips) {
+    const board = new Board(BOARD_SIZE);
+    ships.forEach((ship) => board.addShip(ship));
+    return board;
+  }
+
+  constructor(size) {
     this._size = size;
     this._cells = createCells(size);
-    this._ships = createShips();
-    this._placeShips();
+    this._ships = [];
   }
 
-  _placeShips() {
-    this._ships.forEach((ship, index) => {
-      const { x, y, direction } = layout[index];
-      const position = { x, y };
-      // ship.setPosition(position, direction);
-      this._markOccupiedCells(position, direction, ship);
-    });
+  addShip(ship) {
+    this._ships.push(ship);
+    this._markOccupiedCells(ship);
   }
 
-  _markOccupiedCells(position, direction, ship) {
-    let { x, y } = position;
+  _markOccupiedCells(ship) {
+    let { x, y } = ship.getPosition();
     for (let i = 0; i < ship.getSize(); i++) {
       this._cells[y][x].addShip(ship);
-      if (direction === Direction.HORIZONTAL) {
+      if (ship.getDirection() === Direction.HORIZONTAL) {
         x++;
       } else {
         y++;
@@ -145,7 +68,7 @@ exports.Board = class Board {
   }
 
   getSnapshoot() {
-    const snapshoot = new Array(this._size);
+    const cellsSnapshoot = new Array(this._size);
     for (let i = 0; i < this._size; i++) {
       const row = new Array(this._size);
       for (let j = 0; j < this._size; j++) {
@@ -160,14 +83,16 @@ exports.Board = class Board {
           row[j] = "";
         }
       }
-      snapshoot[i] = row;
+      cellsSnapshoot[i] = row;
     }
 
-    return snapshoot;
+    const shipsSnapshoot = this._ships.map((ship) => ship.getSnapshoot());
+
+    return { cells: cellsSnapshoot, ships: shipsSnapshoot };
   }
 
   getPublicSnapshoot() {
-    const snapshoot = new Array(this._size);
+    const cellsSnapshoot = new Array(this._size);
     for (let i = 0; i < this._size; i++) {
       const row = new Array(this._size);
       for (let j = 0; j < this._size; j++) {
@@ -182,10 +107,10 @@ exports.Board = class Board {
           row[j] = "";
         }
       }
-      snapshoot[i] = row;
+      cellsSnapshoot[i] = row;
     }
 
-    return snapshoot;
+    return cellsSnapshoot;
   }
 
   _getCell(position) {
@@ -222,5 +147,21 @@ exports.Board = class Board {
     const ship = cell.getShip();
 
     return ship != null && ship.isDestroyed();
+  }
+
+  static deserialize(data) {
+    const board = new Board(BOARD_SIZE);
+    data.ships.forEach((snapshoot) =>
+      board.addShip(Ship.deserialize(snapshoot))
+    );
+    data.cells.forEach((row, rowIndex) => {
+      row.forEach((cell, colIndex) => {
+        if (cell == "x" || cell == "o") {
+          board.processShoot({ x: colIndex, y: rowIndex });
+        }
+      });
+    });
+
+    return board;
   }
 };

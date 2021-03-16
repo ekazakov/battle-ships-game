@@ -99,11 +99,15 @@ exports.Storage = class Storage {
     return await this._db.get("users").map(User.deserialize).value();
   }
 
+  async _isGameWithIdExists(id) {
+    return (await this._db.get("games").find({ id }).value()) != null;
+  }
+
   async addGame(game) {
+    game._id; // ?
     try {
       return await this._dbMutex.runExclusive(async () => {
-        const storedGame = await this.getGameById(game.id);
-        if (storedGame != null) {
+        if (await this._isGameWithIdExists(game.getId())) {
           throw new Error(`Game with id: '${game.getId()}' already exists`);
         }
 
@@ -122,7 +126,9 @@ exports.Storage = class Storage {
   }
 
   async getGameById(id) {
-    return Game.deserialize(await this._db.get("games").find({ id }).value());
+    return Game.deserialize(
+      await this._db.get("games").find({ id }).value() /*?*/
+    );
   }
 
   async getGames() {

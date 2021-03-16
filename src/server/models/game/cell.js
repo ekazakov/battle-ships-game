@@ -1,7 +1,7 @@
 exports.Cell = class Cell {
-  constructor(ship, isHit) {
-    this._ship = ship;
-    this._isHit = isHit || false;
+  constructor() {
+    this._ship = null;
+    this._isHit = false;
   }
 
   addShip(ship) {

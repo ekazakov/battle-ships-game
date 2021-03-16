@@ -24,16 +24,16 @@ exports.States = States;
 function createGameMachine(options = {}) {
   const {
     initialState = States.IDLE,
-    playerA = null,
-    playerB = null,
+    playerAid = null,
+    playerBid = null,
     boards = new Map(),
     current = null,
     waiting = null
   } = options;
 
   return StateMachine({
-    playerA,
-    playerB,
+    playerAid,
+    playerBid,
     boards,
     current,
     waiting,
@@ -45,32 +45,32 @@ function createGameMachine(options = {}) {
     [STARTING_STATE]: initialState,
     [STATES]: {
       [States.IDLE]: {
-        initialize: transitionTo(States.AWAITING_PLAYER, function (playerA) {
-          this.playerA = playerA;
-          this.boards.set(playerA, new Board());
+        initialize: transitionTo(States.AWAITING_PLAYER, function (playerAid) {
+          this.playerAid = playerAid;
+          this.boards.set(playerAid, Board.createBoard());
         })
       },
       [States.AWAITING_PLAYER]: {
-        join: transitionTo(States.AWAITING_START, function (playerB) {
-          this.playerB = playerB;
-          this.boards.set(playerB, new Board());
+        join: transitionTo(States.AWAITING_START, function (playerBid) {
+          this.playerBid = playerBid;
+          this.boards.set(playerBid, Board.createBoard());
         }),
         destroy: transitionTo(States.DESTROYED, function () {}),
         leave: transitionTo(States.DESTROYED, function () {})
       },
       [States.AWAITING_START]: {
         leave: transitionTo(States.AWAITING_PLAYER, function (player) {
-          if (player === this.playerA) {
-            this.playerA = null;
-          } else if (player === this.playerB) {
-            this.playerB = null;
+          if (player === this.playerAid) {
+            this.playerAid = null;
+          } else if (player === this.playerBid) {
+            this.playerBid = null;
           } else {
             throw Error(`Player with ${player.id} is not in a game`);
           }
         }),
         start: transitionTo(States.PLAYER_TURN, function () {
-          this.current = this.playerA;
-          this.waiting = this.playerB;
+          this.current = this.playerAid;
+          this.waiting = this.playerBid;
         }),
         destroy: transitionTo(States.DESTROYED, function () {})
       },
@@ -114,7 +114,9 @@ exports.Game = class Game extends Observer {
     this._ownerId = ownerId;
     this._secondPlayerId = null;
     this._machine = machine;
-    this._machine.initialize(ownerId);
+    if (this.getState() === States.IDLE) {
+      this._machine.initialize(ownerId);
+    }
     this._machine.onStateTransition = () => {
       this._notify("update", this.getGameState());
     };
@@ -152,8 +154,8 @@ exports.Game = class Game extends Observer {
   }
 
   join(player) {
-    const { playerA, playerB } = this._machine;
-    if (player === playerA || player === playerB) {
+    const { playerAid, playerBid } = this._machine;
+    if (player === playerAid || player === playerBid) {
       return;
     }
 
@@ -161,12 +163,12 @@ exports.Game = class Game extends Observer {
     this._machine.join(player);
   }
 
-  leave(player) {
-    if (player === this._ownerId) {
+  leave(playerId) {
+    if (playerId === this._ownerId) {
       this._machine.destroy();
       this._ownerId = null;
     } else {
-      this._machine.leave(player);
+      this._machine.leave(playerId);
       if (this.getState() === States.DESTROYED) {
         this._ownerId = null;
       }
@@ -218,7 +220,7 @@ exports.Game = class Game extends Observer {
     const currentBoard = this.getBoard(current);
     const waitingBoard = this.getBoard(waiting);
     const winnerId =
-      waitingBoard?.isAllShipsDestroyed() ?? false ? current.getId() : null;
+      waitingBoard?.isAllShipsDestroyed() ?? false ? current : null;
 
     return {
       id: this.getId(),
@@ -240,19 +242,19 @@ exports.Game = class Game extends Observer {
   static deserialize(gameData) {
     const boards = new Map();
     if (gameData.ownerId != null) {
-      boards.set(gameData.ownerId, new Board(gameData.ownerBoard));
+      boards.set(gameData.ownerId, Board.deserialize(gameData.ownerBoard));
     }
     if (gameData.secondPlayerId != null) {
       boards.set(
         gameData.secondPlayerId,
-        new Board(gameData.secondPlayerBoard)
+        Board.deserialize(gameData.secondPlayerBoard)
       );
     }
 
     const machine = createGameMachine({
       initialState: gameData.state,
-      playerA: gameData.ownerId,
-      playerB: gameData.secondPlayerId,
+      playerAid: gameData.ownerId,
+      playerBid: gameData.secondPlayerId,
       boards,
       current: gameData.current,
       waiting: gameData.waiting

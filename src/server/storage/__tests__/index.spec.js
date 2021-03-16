@@ -83,7 +83,7 @@ describe("Storage", () => {
   describe("Game", () => {
     it("should add game to store", async () => {
       const user = new User("UserA", "password", "user_1");
-      const game = new Game(user);
+      const game = Game.createGame(user.getId());
       const savedGame = await storage.addGame(game);
 
       expect(savedGame).toEqual(game);
@@ -91,9 +91,8 @@ describe("Storage", () => {
 
     it("should throw error if trying add game with duplicate id", async () => {
       const user = new User("UserA", "password", "user_1");
-      const game = new Game(user);
+      const game = Game.createGame(user.getId());
       await storage.addGame(game);
-
       await expect(storage.addGame(game)).rejects.toThrow(
         `Game with id: '${game.getId()}' already exists`
       );
@@ -101,11 +100,11 @@ describe("Storage", () => {
 
     it("should return existing game by id", async () => {
       const user = new User("UserA", "password", "user_1");
-      const game = new Game(user);
+      const game = Game.createGame(user.getId());
       await storage.addGame(game);
 
       const fetchedGame = await storage.getGameById(game.getId());
-      expect(fetchedGame).toEqual(game);
+      expect(fetchedGame.getGameState()).toEqual(game.getGameState());
     });
 
     describe("List Games", () => {
@@ -113,7 +112,10 @@ describe("Storage", () => {
       beforeEach(async () => {
         const newUser1 = new User("UserA", "password", "user_1");
         const newUser2 = new User("UserB", "password", "user_1");
-        games = [new Game(newUser1), new Game(newUser2)];
+        games = [
+          Game.createGame(newUser1.getId()),
+          Game.createGame(newUser2.getId())
+        ];
         await Promise.all(games.map((g) => storage.addGame(g)));
       });
 
