@@ -1,15 +1,22 @@
 const { User } = require("../models/user");
-const { addUser, getUserById, getUserByName } = require("../storage");
+const { Context } = require("../context");
 
 async function isUserWithNameExists(name) {
-  return (await getUserByName(name)) != null;
+  return (await Context.storage.getUserByName(name)) != null;
 }
 
 async function registerUser({ login, password }) {
   const user = User.createUser(login, password);
-  await addUser(user);
+  await Context.storage.addUser(user);
 
   return user;
+}
+
+async function getUserById(id) {
+  return await Context.storage.getUserById(id);
+}
+async function getUserByName(name) {
+  return await Context.storage.getUserByName(name);
 }
 
 module.exports = {

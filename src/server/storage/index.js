@@ -60,12 +60,12 @@ exports.Storage = class Storage {
 
   async getUserById(id) {
     const data = await this._db.get("users").find({ id }).value();
-    return User.deserialize(data);
+    return data != null ? User.deserialize(data) : null;
   }
 
   async getUserByName(name) {
     const data = await this._db.get("users").find({ name }).value();
-    return User.deserialize(data);
+    return data != null ? User.deserialize(data) : null;
   }
 
   async addUser(user) {
@@ -104,7 +104,6 @@ exports.Storage = class Storage {
   }
 
   async addGame(game) {
-    game._id; // ?
     try {
       return await this._dbMutex.runExclusive(async () => {
         if (await this._isGameWithIdExists(game.getId())) {
@@ -126,14 +125,12 @@ exports.Storage = class Storage {
   }
 
   async getGameById(id) {
-    return Game.deserialize(
-      await this._db.get("games").find({ id }).value() /*?*/
-    );
+    const data = await this._db.get("games").find({ id }).value(); // ? $.state
+    return data != null ? Game.deserialize(data) : null;
   }
 
   async getGames() {
-    return await this._db.get("games").map(Game.deserialize).value();
+    const games = await this._db.get("games").value();
+    return (games || []).map(Game.deserialize);
   }
-
-  async resetStorage() {}
 };

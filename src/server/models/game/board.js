@@ -151,10 +151,10 @@ exports.Board = class Board {
 
   static deserialize(data) {
     const board = new Board(BOARD_SIZE);
-    data.ships.forEach((snapshoot) =>
+    data.ships?.forEach((snapshoot) =>
       board.addShip(Ship.deserialize(snapshoot))
     );
-    data.cells.forEach((row, rowIndex) => {
+    data.cells?.forEach((row, rowIndex) => {
       row.forEach((cell, colIndex) => {
         if (cell == "x" || cell == "o") {
           board.processShoot({ x: colIndex, y: rowIndex });

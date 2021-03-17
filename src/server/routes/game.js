@@ -41,11 +41,17 @@ async function routes(fastify) {
     }
   });
 
-  fastify.post("/api/game/create", async (request) => {
-    const userId = getUserIdFromCookie(request.cookies.auth);
+  fastify.post("/api/game/create", async (request, reply) => {
     // TODO: handle exception and return 400
-    const game = await createNewGame(userId);
-    return game.getGameState();
+    try {
+      const userId = getUserIdFromCookie(request.cookies.auth);
+      const game = await createNewGame(userId);
+      return game.getGameState();
+    } catch (error) {
+      console.log(error);
+      reply.code(400);
+      return reply.send(error);
+    }
   });
 
   fastify.post("/api/game/:id/join", async (request, reply) => {

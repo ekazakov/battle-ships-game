@@ -1,8 +1,8 @@
 const { Game } = require("../models/game");
-const { addGame, getGameById, getGames, getUserById } = require("../storage");
+const { Context } = require("../context");
 
 async function createNewGame(userId) {
-  const user = await getUserById(userId);
+  const user = await Context.storage.getUserById(userId);
   if (!user) {
     throw new Error(`User with id: '${userId}' doesn't exists`);
   }
@@ -10,15 +10,15 @@ async function createNewGame(userId) {
     throw new Error("User already has associated game");
   }
 
-  const game = new Game(user);
+  const game = Game.createGame(user.getId());
   user.setGame(game.getId());
-  await addGame(game);
+  await Context.storage.addGame(game);
 
   return game;
 }
 
 async function getGamesList() {
-  const games = await getGames();
+  const games = await Context.storage.getGames();
   return games.map((game) => game.getInfo());
 }
 
@@ -34,6 +34,10 @@ async function nextGameState(game) {
       reject(error);
     }
   });
+}
+
+async function getGameById(id) {
+  return await Context.storage.getGameById(id);
 }
 
 module.exports = {

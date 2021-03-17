@@ -248,4 +248,35 @@ describe("Game", function () {
       });
     });
   });
+
+  it("should correctly serialize and deserialize game", () => {
+    const playerA = createPlayer(1);
+    const playerB = createPlayer(2);
+    const game = Game.createGame(playerA.getId());
+    game.join(playerB.getId());
+    const serialized = Game.serialize(game);
+    const restoredGame = Game.deserialize(serialized);
+
+    expect(restoredGame.getGameState()).toMatchObject({
+      id: "game_1",
+      state: States.AWAITING_START,
+      winnerId: null,
+      ownerId: "player_1",
+      secondPlayerId: "player_2",
+      current: null,
+      waiting: null
+    });
+
+    restoredGame.start();
+
+    expect(restoredGame.getGameState()).toMatchObject({
+      id: "game_1",
+      state: States.PLAYER_TURN,
+      winnerId: null,
+      ownerId: "player_1",
+      secondPlayerId: "player_2",
+      current: "player_1",
+      waiting: "player_2"
+    });
+  });
 });

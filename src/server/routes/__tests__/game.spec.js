@@ -7,12 +7,14 @@ const {
 } = require("../../test-helpers/game-actions");
 const { buildAuthCookie } = require("../../utils/cookie");
 const { buildFastify } = require("../../app");
+const { Storage } = require("../../storage");
 
-describe("Game API", () => {
+describe.only("Game API", () => {
   let fastify = null;
 
   beforeEach(async () => {
-    fastify = await buildFastify();
+    const storage = await Storage.createMemoryStore();
+    fastify = await buildFastify({ storage });
   });
 
   afterEach(() => {
@@ -32,6 +34,7 @@ describe("Game API", () => {
 
     it("should create new game", async () => {
       expect.hasAssertions();
+
       const res = await fastify.inject({
         method: "POST",
         url: "/api/game/create",
@@ -42,11 +45,13 @@ describe("Game API", () => {
 
       expect(res.statusCode).toBe(200);
       expect(res.json()).toEqual({
+        id: "game_1",
+        state: "awaiting",
+        ownerId: "user_1",
+        secondPlayerId: null,
         current: null,
         enemyBoard: null,
-        id: "game_1",
         ownBoard: null,
-        state: "awaiting",
         waiting: null,
         winnerId: null
       });
@@ -125,18 +130,12 @@ describe("Game API", () => {
         expect(res.json()).toEqual([
           {
             id: "game_1",
-            owner: {
-              id: "user_1",
-              name: "UserA"
-            },
+            ownerId: "user_1",
             state: "awaiting"
           },
           {
             id: "game_2",
-            owner: {
-              id: "user_2",
-              name: "UserB"
-            },
+            ownerId: "user_2",
             state: "awaiting"
           }
         ]);
@@ -507,7 +506,7 @@ describe("Game API", () => {
       });
     });
 
-    it("should return error if other player turn", async () => {
+    it.only("should return error if other player turn", async () => {
       const res = await fastify.inject({
         method: "POST",
         url: `/api/game/${game.id}/turn`,

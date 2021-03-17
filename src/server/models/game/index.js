@@ -112,7 +112,6 @@ exports.Game = class Game extends Observer {
     super();
     this._id = id;
     this._ownerId = ownerId;
-    this._secondPlayerId = null;
     this._machine = machine;
     if (this.getState() === States.IDLE) {
       this._machine.initialize(ownerId);
@@ -159,7 +158,6 @@ exports.Game = class Game extends Observer {
       return;
     }
 
-    this._secondPlayerId = player;
     this._machine.join(player);
   }
 
@@ -200,7 +198,8 @@ exports.Game = class Game extends Observer {
     const current = this.getCurrentPlayer();
     const waiting = this.getWaitingPlayer();
     const ownerBoard = this.getBoard(this._ownerId);
-    const secondPlayerBoard = this.getBoard(this._secondPlayerId);
+    const secondPlayerId = this._machine.playerBid;
+    const secondPlayerBoard = this.getBoard(secondPlayerId);
 
     return {
       id: this.getId(),
@@ -208,9 +207,9 @@ exports.Game = class Game extends Observer {
       current,
       waiting,
       ownerId: this._ownerId,
-      secondPlayerId: this._secondPlayerId,
+      secondPlayerId,
       ownerBoard: ownerBoard?.getSnapshoot() ?? null,
-      secondPlayerBoard: secondPlayerBoard?.getPublicSnapshoot() ?? null
+      secondPlayerBoard: secondPlayerBoard?.getSnapshoot() ?? null
     };
   }
 
@@ -219,6 +218,7 @@ exports.Game = class Game extends Observer {
     const waiting = this.getWaitingPlayer();
     const currentBoard = this.getBoard(current);
     const waitingBoard = this.getBoard(waiting);
+    const secondPlayerId = this._machine.playerBid;
     const winnerId =
       waitingBoard?.isAllShipsDestroyed() ?? false ? current : null;
 
@@ -229,7 +229,7 @@ exports.Game = class Game extends Observer {
       current,
       waiting,
       ownerId: this._ownerId,
-      secondPlayerId: this._secondPlayerId,
+      secondPlayerId,
       ownBoard: currentBoard?.getSnapshoot() ?? null,
       enemyBoard: waitingBoard?.getPublicSnapshoot() ?? null
     };
