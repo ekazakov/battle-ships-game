@@ -9,7 +9,7 @@ const { buildAuthCookie } = require("../../utils/cookie");
 const { buildFastify } = require("../../app");
 const { Storage } = require("../../storage");
 
-describe.only("Game API", () => {
+describe("Game API", () => {
   let fastify = null;
 
   beforeEach(async () => {
@@ -197,10 +197,7 @@ describe.only("Game API", () => {
       expect(res.statusCode).toBe(200);
       expect(res.json()).toEqual({
         id: "game_1",
-        owner: {
-          id: "user_1",
-          name: "UserA"
-        },
+        ownerId: "user_1",
         state: "awaitingStart"
       });
     });
@@ -242,10 +239,7 @@ describe.only("Game API", () => {
         expect(res.statusCode).toBe(200);
         expect(res.json()).toEqual({
           id: "game_1",
-          owner: {
-            id: "user_1",
-            name: "UserA"
-          },
+          ownerId: "user_1",
           state: "awaitingStart"
         });
       });
@@ -263,10 +257,7 @@ describe.only("Game API", () => {
         expect(res.statusCode).toBe(200);
         expect(res.json()).toEqual({
           id: "game_1",
-          owner: {
-            id: "user_1",
-            name: "UserA"
-          },
+          ownerId: "user_1",
           state: "awaitingStart"
         });
       });
@@ -323,10 +314,7 @@ describe.only("Game API", () => {
       expect(res.statusCode).toBe(200);
       expect(res.json()).toEqual({
         id: "game_1",
-        owner: {
-          id: "user_1",
-          name: "UserA"
-        },
+        ownerId: "user_1",
         state: "playerTurn"
       });
     });
@@ -382,7 +370,7 @@ describe.only("Game API", () => {
       expect(res.statusCode).toBe(200);
       expect(res.json()).toEqual({
         id: "game_1",
-        owner: null,
+        ownerId: "user_1",
         state: "destroyed"
       });
     });
@@ -398,10 +386,7 @@ describe.only("Game API", () => {
       expect(res.statusCode).toBe(200);
       expect(res.json()).toEqual({
         id: "game_1",
-        owner: {
-          id: "user_1",
-          name: "UserA"
-        },
+        ownerId: "user_1",
         state: "awaiting"
       });
     });
@@ -433,10 +418,7 @@ describe.only("Game API", () => {
         expect(res.statusCode).toBe(200);
         expect(res.json()).toEqual({
           id: "game_1",
-          owner: {
-            id: "user_1",
-            name: "UserA"
-          },
+          ownerId: "user_1",
           state: "awaitingStart"
         });
       });
@@ -458,7 +440,7 @@ describe.only("Game API", () => {
         expect(res.statusCode).toBe(200);
         expect(res.json()).toEqual({
           id: "game_1",
-          owner: null,
+          ownerId: "user_1",
           state: "destroyed"
         });
       });
@@ -498,15 +480,12 @@ describe.only("Game API", () => {
       expect(res.statusCode).toBe(200);
       expect(res.json()).toEqual({
         id: "game_1",
-        owner: {
-          id: "user_1",
-          name: "UserA"
-        },
+        ownerId: "user_1",
         state: "playerTurn"
       });
     });
 
-    it.only("should return error if other player turn", async () => {
+    it("should return error if other player turn", async () => {
       const res = await fastify.inject({
         method: "POST",
         url: `/api/game/${game.id}/turn`,
@@ -524,26 +503,4 @@ describe.only("Game API", () => {
       });
     });
   });
-  // it("One", (done) => {
-  //   fastify.listen(0, () => {
-  //     const port = fastify.server.address().port;
-  //     const es = new EventSource(createUrl(port, 1));
-  //     es.onmessage = (evt) => {
-  //       console.log(evt);
-  //     };
-  //     es.onopen = (evt) => {
-  //       console.log("onopen", evt);
-  //     };
-  //     es.addEventListener("end", (evt) => {
-  //       console.log("onend", evt);
-  //       done();
-  //     });
-  //     es.onerror = (evt) => {
-  //       console.log("onerror", evt.message);
-  //       if (evt.message != null) {
-  //         done(evt);
-  //       }
-  //     };
-  //   });
-  // });
 });

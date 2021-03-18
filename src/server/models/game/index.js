@@ -152,24 +152,20 @@ exports.Game = class Game extends Observer {
     this._machine.start();
   }
 
-  join(player) {
+  join(playerId) {
     const { playerAid, playerBid } = this._machine;
-    if (player === playerAid || player === playerBid) {
+    if (playerId === playerAid || playerId === playerBid) {
       return;
     }
 
-    this._machine.join(player);
+    this._machine.join(playerId);
   }
 
   leave(playerId) {
     if (playerId === this._ownerId) {
       this._machine.destroy();
-      this._ownerId = null;
     } else {
       this._machine.leave(playerId);
-      if (this.getState() === States.DESTROYED) {
-        this._ownerId = null;
-      }
     }
   }
 

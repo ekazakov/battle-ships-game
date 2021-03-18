@@ -125,12 +125,20 @@ exports.Storage = class Storage {
   }
 
   async getGameById(id) {
-    const data = await this._db.get("games").find({ id }).value(); // ? $.state
+    const data = await this._db.get("games").find({ id }).value();
     return data != null ? Game.deserialize(data) : null;
   }
 
   async getGames() {
     const games = await this._db.get("games").value();
     return (games || []).map(Game.deserialize);
+  }
+
+  async updateGame(game) {
+    await this._db
+      .get("games")
+      .updateById(game.getId(), Game.serialize(game))
+      .write();
+    return game;
   }
 };

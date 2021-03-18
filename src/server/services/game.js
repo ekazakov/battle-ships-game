@@ -40,9 +40,35 @@ async function getGameById(id) {
   return await Context.storage.getGameById(id);
 }
 
+// TODO: null check
+async function startGame(game) {
+  game.start();
+  return Context.storage.updateGame(game);
+}
+
+async function joinGame(game, user) {
+  game.join(user.getId());
+  return Context.storage.updateGame(game);
+}
+
+async function makeGameTurn(game, user, target) {
+  game.makeShot(user.getId(), target);
+  return Context.storage.updateGame(game);
+}
+
+async function leaveGame(game, user) {
+  // TODO: update user active games list
+  game.leave(user.getId());
+  return Context.storage.updateGame(game);
+}
+
 module.exports = {
   createNewGame,
   getGameById,
   getGamesList,
-  nextGameState
+  nextGameState,
+  startGame,
+  joinGame,
+  makeGameTurn,
+  leaveGame
 };

@@ -1,10 +1,16 @@
 const { authCheck } = require("../utils/auth-check");
-const { nextGameState } = require("../services/game");
-const { getGameById } = require("../services/game");
-const { getGamesList } = require("../services/game");
-const { getUserById } = require("../services/user");
 const { getUserIdFromCookie } = require("../utils/cookie");
-const { createNewGame } = require("../services/game");
+const { getUserById } = require("../services/user");
+const {
+  nextGameState,
+  getGameById,
+  getGamesList,
+  createNewGame,
+  startGame,
+  joinGame,
+  makeGameTurn,
+  leaveGame
+} = require("../services/game");
 
 const anAuthorizedAccessList = ["/api/game/list"];
 
@@ -66,7 +72,7 @@ async function routes(fastify) {
         return reply.send(new Error("Game doesn't exist"));
       }
 
-      game.join(user);
+      await joinGame(game, user);
 
       reply.code(200);
       return game.getInfo();
@@ -85,7 +91,7 @@ async function routes(fastify) {
         return reply.send(new Error("Game doesn't exist"));
       }
 
-      game.start();
+      await startGame(game);
 
       reply.code(200);
       return game.getInfo();
@@ -107,7 +113,8 @@ async function routes(fastify) {
         return reply.send(new Error("Game doesn't exist"));
       }
 
-      game.leave(user);
+      await leaveGame(game, user);
+
       reply.code(200);
       return game.getInfo();
     } catch (e) {
@@ -133,7 +140,7 @@ async function routes(fastify) {
         return reply.send(new Error("Game doesn't exist"));
       }
 
-      game.makeShot(user, target);
+      await makeGameTurn(game, user, target);
       reply.code(200);
       return game.getInfo();
     } catch (e) {
@@ -164,7 +171,6 @@ async function routes(fastify) {
           while (!game.isOver()) {
             const gameState = await nextGameState(game);
             const evt = { data: JSON.stringify(gameState) };
-            // console.log("evt:", evt);
             yield evt;
           }
         })()
