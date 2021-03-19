@@ -67,8 +67,8 @@ exports.Board = class Board {
     return this._ships.every((ship) => ship.isDestroyed());
   }
 
-  getSnapshoot() {
-    const cellsSnapshoot = new Array(this._size);
+  getSnapshot() {
+    const cellsSnapshot = new Array(this._size);
     for (let i = 0; i < this._size; i++) {
       const row = new Array(this._size);
       for (let j = 0; j < this._size; j++) {
@@ -83,16 +83,16 @@ exports.Board = class Board {
           row[j] = "";
         }
       }
-      cellsSnapshoot[i] = row;
+      cellsSnapshot[i] = row;
     }
 
-    const shipsSnapshoot = this._ships.map((ship) => ship.getSnapshoot());
+    const shipsSnapshot = this._ships.map((ship) => ship.getSnapshot());
 
-    return { cells: cellsSnapshoot, ships: shipsSnapshoot };
+    return { cells: cellsSnapshot, ships: shipsSnapshot };
   }
 
-  getPublicSnapshoot() {
-    const cellsSnapshoot = new Array(this._size);
+  getPublicSnapshot() {
+    const cellsSnapshot = new Array(this._size);
     for (let i = 0; i < this._size; i++) {
       const row = new Array(this._size);
       for (let j = 0; j < this._size; j++) {
@@ -107,10 +107,10 @@ exports.Board = class Board {
           row[j] = "";
         }
       }
-      cellsSnapshoot[i] = row;
+      cellsSnapshot[i] = row;
     }
 
-    return cellsSnapshoot;
+    return cellsSnapshot;
   }
 
   _getCell(position) {
@@ -151,12 +151,12 @@ exports.Board = class Board {
 
   static deserialize(data) {
     const board = new Board(BOARD_SIZE);
-    data.ships?.forEach((snapshoot) =>
-      board.addShip(Ship.deserialize(snapshoot))
+    data.ships?.forEach((snapshot) =>
+      board.addShip(Ship.deserialize(snapshot))
     );
     data.cells?.forEach((row, rowIndex) => {
       row.forEach((cell, colIndex) => {
-        if (cell == "x" || cell == "o") {
+        if (cell === "x" || cell === "o") {
           board.processShoot({ x: colIndex, y: rowIndex });
         }
       });

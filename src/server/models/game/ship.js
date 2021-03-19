@@ -32,7 +32,7 @@ exports.Ship = class Ship {
     return this._size > this._health;
   }
 
-  getSnapshoot() {
+  getSnapshot() {
     return {
       size: this._size,
       position: this._position,

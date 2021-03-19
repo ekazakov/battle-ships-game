@@ -204,8 +204,8 @@ exports.Game = class Game extends Observer {
       waiting,
       ownerId: this._ownerId,
       secondPlayerId,
-      ownerBoard: ownerBoard?.getSnapshoot() ?? null,
-      secondPlayerBoard: secondPlayerBoard?.getSnapshoot() ?? null
+      ownerBoard: ownerBoard?.getSnapshot() ?? null,
+      secondPlayerBoard: secondPlayerBoard?.getSnapshot() ?? null
     };
   }
 
@@ -226,8 +226,8 @@ exports.Game = class Game extends Observer {
       waiting,
       ownerId: this._ownerId,
       secondPlayerId,
-      ownBoard: currentBoard?.getSnapshoot() ?? null,
-      enemyBoard: waitingBoard?.getPublicSnapshoot() ?? null
+      ownBoard: currentBoard?.getSnapshot() ?? null,
+      enemyBoard: waitingBoard?.getPublicSnapshot() ?? null
     };
   }
 
