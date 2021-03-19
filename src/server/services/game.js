@@ -1,3 +1,5 @@
+const events = require("events");
+const { mediator } = require("../mediator");
 const { Game } = require("../models/game");
 const { Context } = require("../context");
 
@@ -14,6 +16,10 @@ async function createNewGame(userId) {
   user.setGame(game.getId());
   await Context.storage.addGame(game);
 
+  game.addObserver((evt, payload) => {
+    mediator.emit(`game:${game.getId()}:updated`, payload);
+  });
+
   return game;
 }
 
@@ -22,22 +28,16 @@ async function getGamesList() {
   return games.map((game) => game.getInfo());
 }
 
-async function nextGameState(game) {
-  return new Promise((resolve, reject) => {
-    try {
-      const observer = (event, payload) => {
-        resolve(payload);
-        game.removeObserver(observer);
-      };
-      game.addObserver(observer);
-    } catch (error) {
-      reject(error);
-    }
-  });
+async function nextGameState(gameId) {
+  return events.once(mediator, `game:${gameId}:updated`).then(([data]) => data);
 }
 
 async function getGameById(id) {
-  return await Context.storage.getGameById(id);
+  const game = await Context.storage.getGameById(id);
+  game?.addObserver((evt, payload) => {
+    mediator.emit(`game:${game?.getId()}:updated`, payload);
+  });
+  return game;
 }
 
 // TODO: null check

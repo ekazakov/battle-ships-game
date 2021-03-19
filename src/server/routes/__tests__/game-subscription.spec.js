@@ -129,15 +129,11 @@ describe("Game API: Subscription", () => {
 
     expect(evt.data).toMatchSnapshot({
       id: "game_1",
-      waiting: {
-        id: "user_2",
-        name: "UserB"
-      },
+      waiting: "user_2",
       state: "playerTurn",
-      current: {
-        id: "user_1",
-        name: "UserA"
-      },
+      current: "user_1",
+      ownerId: "user_1",
+      secondPlayerId: "user_2",
       winnerId: null
     });
   });
@@ -161,7 +157,7 @@ describe("Game API: Subscription", () => {
     });
   });
 
-  it.skip("should send message when user make a turn", async () => {
+  it("should send message when user make a turn", async () => {
     await joinGame(fastify, bUserId, game.id);
     await startGame(fastify, aUserId, game.id);
     await nextEvent(subscription);
@@ -173,16 +169,12 @@ describe("Game API: Subscription", () => {
 
     expect(evt2.data).toMatchSnapshot({
       id: "game_1",
-      current: {
-        id: "user_2",
-        name: "UserB"
-      },
       state: "playerTurn",
-      waiting: {
-        id: "user_1",
-        name: "UserA"
-      },
-      winnerId: null
+      ownerId: "user_1",
+      secondPlayerId: "user_2",
+      winnerId: null,
+      current: "user_2",
+      waiting: "user_1"
     });
   });
 

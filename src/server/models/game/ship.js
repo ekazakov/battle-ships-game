@@ -35,7 +35,6 @@ exports.Ship = class Ship {
   getSnapshoot() {
     return {
       size: this._size,
-      health: this._health,
       position: this._position,
       direction: this._direction
     };

@@ -169,7 +169,7 @@ async function routes(fastify) {
           yield evt1;
 
           while (!game.isOver()) {
-            const gameState = await nextGameState(game);
+            const gameState = await nextGameState(game.getId());
             const evt = { data: JSON.stringify(gameState) };
             yield evt;
           }
