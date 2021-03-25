@@ -8,13 +8,12 @@ import {
   NavLink
 } from "react-router-dom";
 import { useObservable } from "../hooks/use-observable";
-import { authObservable, AuthStatus } from "../observables/auth";
+import { authObservable, isAuthorized } from "../observables/auth";
 import { Global, css } from "@emotion/react";
 import { GameList } from "./game-list";
 import { Game } from "./game";
 import { PrivateRoute } from "./private-route";
 import { LogoutButton } from "./logout-button";
-// import { load } from "../util/load";
 
 const globalStyles = css`
   font-family: "Helvetica Neue", Arial, sans-serif;
@@ -28,8 +27,8 @@ export function App() {
       <Global styles={globalStyles} />
 
       <BrowserRouter>
-        {authState.value === AuthStatus.UNAUTHORIZED && <AuthForm />}
-        {authState.value === AuthStatus.AUTHORIZED && <LogoutButton />}
+        {!isAuthorized(authState) && <AuthForm />}
+        {isAuthorized(authState) && <LogoutButton />}
 
         <ul>
           <li>
@@ -37,7 +36,7 @@ export function App() {
           </li>
 
           <li>
-            <NavLink to="/game/1">Game 1</NavLink>
+            <NavLink to="/game">Game</NavLink>
           </li>
         </ul>
         <Switch>
@@ -46,11 +45,7 @@ export function App() {
           </Route>
 
           <Route path="/game-list" component={GameList} />
-          <Route path="/game-list/foo" component={GameList} />
-          <PrivateRoute
-            path="/game/:id"
-            render={(props) => <Game {...props} />}
-          />
+          <PrivateRoute path="/game" exact component={Game} />
         </Switch>
       </BrowserRouter>
     </div>

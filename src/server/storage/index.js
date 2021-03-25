@@ -141,4 +141,12 @@ exports.Storage = class Storage {
       .write();
     return game;
   }
+
+  async updateUser(user) {
+    await this._db
+      .get("users")
+      .updateById(user.getId(), User.serialize(user))
+      .write();
+    return user;
+  }
 };

@@ -15,6 +15,7 @@ async function createNewGame(userId) {
   const game = Game.createGame(user.getId());
   user.setGame(game.getId());
   await Context.storage.addGame(game);
+  await Context.storage.updateUser(user);
 
   game.addObserver((evt, payload) => {
     mediator.emit(`game:${game.getId()}:updated`, payload);
@@ -48,7 +49,9 @@ async function startGame(game) {
 
 async function joinGame(game, user) {
   game.join(user.getId());
-  return Context.storage.updateGame(game);
+  user.setGame(game.getId());
+  await Context.storage.updateGame(game);
+  await Context.storage.updateUser(user);
 }
 
 async function makeGameTurn(game, user, target) {

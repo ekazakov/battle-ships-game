@@ -29,7 +29,7 @@ exports.User = class User {
   }
 
   getInfo() {
-    return { name: this.getName(), id: this.getId() };
+    return { name: this.getName(), id: this.getId(), gameId: this.getGameId() };
   }
 
   isLoginAndPasswordValid(name, password) {

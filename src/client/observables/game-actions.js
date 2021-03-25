@@ -49,7 +49,11 @@ export const GameAction = {
   INIT: "INIT",
   GAME_CREATION_STARTED: "GAME_CREATION_STARTED",
   GAME_CREATION_FAILED: "GAME_CREATION_FAILED",
-  GAME_CREATION_SUCCESS: "GAME_CREATED"
+  GAME_CREATION_SUCCESS: "GAME_CREATION_SUCCESS",
+
+  GAME_JOIN_STARTED: "GAME_JOIN_STARTED",
+  GAME_JOIN_FAILED: "GAME_JOIN_FAILED",
+  GAME_JOIN_SUCCESS: "GAME_JOIN_SUCCESS"
 };
 
 function gameReducer(state, action) {
@@ -101,4 +105,52 @@ export function createGame() {
         error
       })
     );
+}
+
+export function joinGame(id) {
+  gameStore.updateState({ type: GameAction.GAME_JOIN_FAILED });
+  return fetch(`/api/game/${id}/join`, { method: "POST" })
+    .then((response) =>
+      response.json().then((data) => {
+        if (response.ok) {
+          gameStore.updateState({
+            type: GameAction.GAME_JOIN_SUCCESS,
+            payload: data,
+            error: null
+          });
+        } else {
+          throw data;
+        }
+      })
+    )
+    .catch((error) =>
+      gameStore.updateState({
+        type: GameAction.GAME_JOIN_FAILED,
+        payload: null,
+        error
+      })
+    );
+}
+
+let gameUpdatesSource = null;
+
+export function subscribeOnGame(id) {
+  gameUpdatesSource?.close();
+  gameUpdatesSource = new EventSource(`/api/game/${id}/subscribe`);
+
+  gameUpdatesSource.onopen = (evt) => {
+    console.log("subscription ready", evt);
+  };
+
+  gameUpdatesSource.onmessage = (evt) => {
+    console.log("message", evt);
+  };
+
+  gameUpdatesSource.onerror = (error) => {
+    console.log("subscription error", error);
+  };
+}
+
+export function stopSubscription() {
+  gameUpdatesSource?.close();
 }

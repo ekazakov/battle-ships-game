@@ -12,9 +12,8 @@ exports.authCheck = async function authCheck(request) {
     if (!user) {
       return { code: 400, error: new Error("User doesn't exist") };
     }
+    return { code: 200, user };
   } catch (error) {
     return { code: 400, error };
   }
-
-  return { code: 204 };
 };

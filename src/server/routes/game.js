@@ -21,7 +21,7 @@ async function routes(fastify) {
     }
 
     const result = await authCheck(request);
-    if (result.code !== 204) {
+    if (result.code >= 400) {
       reply.code(result.code);
       return reply.send(result.error);
     }

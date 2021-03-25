@@ -31,7 +31,14 @@ const registrationSchema = {
 };
 
 function createAuthCookie(user) {
-  return ["auth", `auth-token#${user.getId()}`];
+  return [
+    "auth",
+    `auth-token#${user.getId()}`,
+    {
+      path: "/",
+      expires: Date.now() + 60 * 60 * 1000
+    }
+  ];
 }
 
 async function routes(fastify) {
@@ -43,11 +50,11 @@ async function routes(fastify) {
       try {
         const user = await registerUser({ login, password });
         reply.setCookie(...createAuthCookie(user));
+        return reply.send(user.getInfo());
       } catch (error) {
         reply.code(400);
         return reply.send(error);
       }
-      return { result: "success" };
     }
   );
 
@@ -62,7 +69,7 @@ async function routes(fastify) {
           const user = await getUserByName(login);
           if (user.isLoginAndPasswordValid(login, password)) {
             reply.setCookie(...createAuthCookie(user));
-            return { result: "success" };
+            return reply.send(user.getInfo());
           }
         }
         reply.code(400);
@@ -83,9 +90,9 @@ async function routes(fastify) {
   });
 
   fastify.get("/api/auth_check", async (request, reply) => {
-    const result = authCheck(request);
+    const result = await authCheck(request);
     reply.code(result.code);
-    return reply.send(result.error);
+    return reply.send(result?.user?.getInfo() || result.error);
   });
 }
 

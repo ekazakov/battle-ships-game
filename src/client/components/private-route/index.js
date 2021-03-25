@@ -1,5 +1,5 @@
 import { Redirect, Route } from "react-router-dom";
-import { authObservable, AuthStatus } from "../../observables/auth";
+import { authObservable, isAuthorized } from "../../observables/auth";
 import { useObservable } from "../../hooks/use-observable";
 
 export function PrivateRoute({ render, ...otherProps }) {
@@ -8,7 +8,7 @@ export function PrivateRoute({ render, ...otherProps }) {
     <Route
       {...otherProps}
       render={(props) => {
-        if (authState.value === AuthStatus.AUTHORIZED) {
+        if (isAuthorized(authState)) {
           return render(props);
         }
 
