@@ -1,4 +1,5 @@
 import { BehaviorSubject } from "rxjs";
+import { map } from "rxjs/operators";
 
 export const AuthStatus = {
   UNAUTHORIZED: "UNAUTHORIZED",
@@ -12,7 +13,8 @@ export function isAuthorized(data) {
 const subject = new BehaviorSubject({
   status: "idle",
   authState: null,
-  user: null
+  user: null,
+  error: null
 });
 
 const authObservable = subject.asObservable();
@@ -24,7 +26,9 @@ const headers = {
 function login(body) {
   subject.next({
     status: "loading",
-    authState: null
+    error: null,
+    authState: null,
+    user: null
   });
 
   fetch("/api/login", {
@@ -38,12 +42,14 @@ function login(body) {
           subject.next({
             status: "success",
             authState: AuthStatus.AUTHORIZED,
-            user
+            user,
+            error: null
           });
         } else {
           subject.next({
             status: "success",
-            authState: AuthStatus.UNAUTHORIZED
+            authState: AuthStatus.UNAUTHORIZED,
+            error: null
           });
         }
       })
@@ -60,7 +66,9 @@ function login(body) {
 function register(body) {
   subject.next({
     status: "loading",
-    authState: null
+    authState: null,
+    user: null,
+    error: null
   });
 
   fetch("/api/register", {
@@ -74,13 +82,15 @@ function register(body) {
           subject.next({
             status: "success",
             authState: AuthStatus.AUTHORIZED,
-            user
+            user,
+            error: null
           });
         } else {
           subject.next({
             status: "success",
             authState: AuthStatus.UNAUTHORIZED,
-            user: null
+            user: null,
+            error: null
           });
         }
       })
@@ -97,14 +107,17 @@ function register(body) {
 function logout() {
   subject.next({
     status: "loading",
-    authState: null
+    authState: null,
+    error: null,
+    user: null
   });
 
   fetch("/api/logout", { method: "POST" })
     .then(() => {
       subject.next({
         authState: AuthStatus.UNAUTHORIZED,
-        status: "success"
+        status: "success",
+        error: null
       });
     })
     .catch((error) =>
@@ -129,12 +142,48 @@ function checkAuth() {
           subject.next({
             status: "success",
             authState: AuthStatus.AUTHORIZED,
-            user
+            user,
+            error: null
           });
         } else {
           subject.next({
             status: "success",
-            authState: AuthStatus.UNAUTHORIZED
+            authState: AuthStatus.UNAUTHORIZED,
+            error: null
+          });
+        }
+      });
+    })
+    .catch((error) =>
+      subject.next({
+        authState: AuthStatus.UNAUTHORIZED,
+        status: "failure",
+        error
+      })
+    );
+}
+
+export function profile() {
+  subject.next({
+    status: "loading",
+    authState: null
+  });
+
+  fetch("/api/profile")
+    .then((response) => {
+      return response.json().then((user) => {
+        if (response.ok) {
+          subject.next({
+            status: "success",
+            authState: AuthStatus.AUTHORIZED,
+            user,
+            error: null
+          });
+        } else {
+          subject.next({
+            status: "success",
+            authState: AuthStatus.UNAUTHORIZED,
+            error: null
           });
         }
       });
@@ -155,4 +204,17 @@ function reset() {
   });
 }
 
-export { login, register, logout, reset, checkAuth, authObservable };
+const profileObservable = authObservable.pipe(
+  map((state) => {
+    return { status: state.status, error: state.error, value: state.user };
+  })
+);
+export {
+  login,
+  register,
+  logout,
+  reset,
+  checkAuth,
+  authObservable,
+  profileObservable
+};

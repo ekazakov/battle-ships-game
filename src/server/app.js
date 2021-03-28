@@ -30,6 +30,8 @@ exports.buildFastify = async function buildFastify(options = {}) {
   fastify.register(FastifyCookiePlugin);
   fastify.register(require("./routes/auth"));
   fastify.register(require("./routes/game"));
+  fastify.register(require("./routes/profile"));
+  fastify.register(require("./routes/users"));
 
   return fastify;
 };

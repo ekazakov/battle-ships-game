@@ -29,15 +29,15 @@ async function getGamesList() {
   return games.map((game) => game.getInfo());
 }
 
-async function nextGameState(gameId) {
-  return events.once(mediator, `game:${gameId}:updated`).then(([data]) => data);
+async function nextGameState(gameId, userId) {
+  return events
+    .once(mediator, `game:${gameId}:updated`)
+    .then(([game]) => game.getGameStateForPlayer(userId));
 }
 
 async function getGameById(id) {
   const game = await Context.storage.getGameById(id);
-  game?.addObserver((evt, payload) => {
-    mediator.emit(`game:${game?.getId()}:updated`, payload);
-  });
+  mediator.emit(`game:${game?.getId()}:updated`, game);
   return game;
 }
 
@@ -62,6 +62,24 @@ async function makeGameTurn(game, user, target) {
 async function leaveGame(game, user) {
   // TODO: update user active games list
   game.leave(user.getId());
+  if (game.getOwnerId() === user.getId()) {
+    user.setGame(null);
+    await Context.storage.updateUser(user);
+    const secondUserId = game.getSecondPlayerId();
+    if (secondUserId) {
+      const secondUser = await Context.storage.getUserById(
+        game.getSecondPlayerId()
+      );
+
+      if (secondUser) {
+        secondUser.setGame(null);
+        await Context.storage.updateUser(secondUser);
+      }
+    }
+  } else {
+    user.setGame(null);
+    await Context.storage.updateUser(user);
+  }
   return Context.storage.updateGame(game);
 }
 

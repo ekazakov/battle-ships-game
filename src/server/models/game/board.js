@@ -110,7 +110,7 @@ exports.Board = class Board {
       cellsSnapshot[i] = row;
     }
 
-    return cellsSnapshot;
+    return { cells: cellsSnapshot, ships: [] };
   }
 
   _getCell(position) {

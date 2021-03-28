@@ -65,7 +65,7 @@ describe("Game", function () {
       game.join(playerB.getId());
       game.destroy();
 
-      expect(game.getGameState()).toMatchObject({
+      expect(game.getGameStateForPlayer()).toMatchObject({
         state: States.DESTROYED,
         winnerId: null,
         current: null,
@@ -104,7 +104,7 @@ describe("Game", function () {
         game.start();
         game.makeShot(playerA.getId(), { x: 6, y: 0 });
 
-        expect(game.getGameState()).toMatchSnapshot({
+        expect(game.getGameStateForPlayer()).toMatchSnapshot({
           id: "game_1",
           state: States.PLAYER_TURN,
           winnerId: null,
@@ -120,7 +120,7 @@ describe("Game", function () {
         game.join(playerB.getId());
         game.start();
         game.makeShot(playerA.getId(), { x: 5, y: 0 });
-        expect(game.getGameState()).toMatchSnapshot({
+        expect(game.getGameStateForPlayer()).toMatchSnapshot({
           id: "game_1",
           state: States.PLAYER_TURN,
           winnerId: null,
@@ -146,7 +146,7 @@ describe("Game", function () {
         game.makeShot(playerA.getId(), { x: 6, y: 0 });
         game.makeShot(playerA.getId(), { x: 6, y: 0 });
 
-        expect(game.getGameState()).toMatchSnapshot({
+        expect(game.getGameStateForPlayer()).toMatchSnapshot({
           id: "game_1",
           state: States.PLAYER_TURN,
           winnerId: null,
@@ -236,7 +236,7 @@ describe("Game", function () {
           }
         });
 
-        expect(game.getGameState()).toMatchSnapshot({
+        expect(game.getGameStateForPlayer()).toMatchSnapshot({
           id: "game_1",
           state: States.FINISHED,
           winnerId: "player_1",
@@ -257,7 +257,7 @@ describe("Game", function () {
     const serialized = Game.serialize(game);
     const restoredGame = Game.deserialize(serialized);
 
-    expect(restoredGame.getGameState()).toMatchObject({
+    expect(restoredGame.getGameStateForPlayer()).toMatchObject({
       id: "game_1",
       state: States.AWAITING_START,
       winnerId: null,
@@ -269,7 +269,7 @@ describe("Game", function () {
 
     restoredGame.start();
 
-    expect(restoredGame.getGameState()).toMatchObject({
+    expect(restoredGame.getGameStateForPlayer()).toMatchObject({
       id: "game_1",
       state: States.PLAYER_TURN,
       winnerId: null,

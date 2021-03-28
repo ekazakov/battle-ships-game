@@ -1,5 +1,7 @@
 import { BehaviorSubject } from "rxjs";
 import { Store } from "../store/store";
+import { authObservable } from "./auth";
+import { distinctUntilChanged, map } from "rxjs/operators";
 
 const gamesListSubject = new BehaviorSubject({
   status: "idle",
@@ -47,25 +49,21 @@ export function fetchGamesList() {
 
 export const GameAction = {
   INIT: "INIT",
-  GAME_CREATION_STARTED: "GAME_CREATION_STARTED",
-  GAME_CREATION_FAILED: "GAME_CREATION_FAILED",
-  GAME_CREATION_SUCCESS: "GAME_CREATION_SUCCESS",
-
-  GAME_JOIN_STARTED: "GAME_JOIN_STARTED",
-  GAME_JOIN_FAILED: "GAME_JOIN_FAILED",
-  GAME_JOIN_SUCCESS: "GAME_JOIN_SUCCESS"
+  GAME_UPDATE_STARTED: "GAME_UPDATE_STARTED",
+  GAME_UPDATE_FAILED: "GAME_UPDATE_FAILED",
+  GAME_UPDATE_SUCCESS: "GAME_UPDATE_SUCCESS"
 };
 
 function gameReducer(state, action) {
   switch (action.type) {
-    case GameAction.GAME_CREATION_STARTED:
+    case GameAction.GAME_UPDATE_STARTED:
       return { ...state, status: "loading", error: null };
-    case GameAction.GAME_CREATION_FAILED:
+    case GameAction.GAME_UPDATE_FAILED:
       return { ...state, status: "failure", error: action.error };
-    case GameAction.GAME_CREATION_SUCCESS:
+    case GameAction.GAME_UPDATE_SUCCESS:
       return {
         ...state,
-        currentGame: action.payload,
+        value: action.payload,
         status: "success",
         error: null
       };
@@ -75,21 +73,21 @@ function gameReducer(state, action) {
 }
 
 const gameStore = new Store(
-  { currentGame: {}, status: "idle", error: null },
+  { value: {}, status: "idle", error: null },
   gameReducer
 );
 
 export const gameStoreObservable = gameStore.stateChanges();
 
 export function createGame() {
-  gameStore.updateState({ type: GameAction.GAME_CREATION_STARTED });
+  gameStore.updateState({ type: GameAction.GAME_UPDATE_STARTED });
 
   return fetch("/api/game/create", { method: "POST" })
     .then((response) =>
       response.json().then((data) => {
         if (response.ok) {
           gameStore.updateState({
-            type: GameAction.GAME_CREATION_SUCCESS,
+            type: GameAction.GAME_UPDATE_SUCCESS,
             payload: data,
             error: null
           });
@@ -100,7 +98,7 @@ export function createGame() {
     )
     .catch((error) =>
       gameStore.updateState({
-        type: GameAction.GAME_CREATION_FAILED,
+        type: GameAction.GAME_UPDATE_FAILED,
         payload: null,
         error
       })
@@ -108,13 +106,13 @@ export function createGame() {
 }
 
 export function joinGame(id) {
-  gameStore.updateState({ type: GameAction.GAME_JOIN_FAILED });
+  gameStore.updateState({ type: GameAction.GAME_UPDATE_STARTED });
   return fetch(`/api/game/${id}/join`, { method: "POST" })
     .then((response) =>
       response.json().then((data) => {
         if (response.ok) {
           gameStore.updateState({
-            type: GameAction.GAME_JOIN_SUCCESS,
+            type: GameAction.GAME_UPDATE_SUCCESS,
             payload: data,
             error: null
           });
@@ -125,16 +123,70 @@ export function joinGame(id) {
     )
     .catch((error) =>
       gameStore.updateState({
-        type: GameAction.GAME_JOIN_FAILED,
+        type: GameAction.GAME_UPDATE_FAILED,
         payload: null,
         error
       })
     );
 }
 
+export function startGame(id) {
+  return fetch(`/api/game/${id}/start`, { method: "POST" }).then((response) =>
+    response.json().then((data) => {
+      if (response.ok) {
+        return data;
+      } else {
+        throw data;
+      }
+    })
+  );
+}
+
+export function makeTurn(id, target) {
+  return fetch(`/api/game/${id}/turn`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(target)
+  }).then((response) =>
+    response.json().then((data) => {
+      if (response.ok) {
+        return data;
+      } else {
+        throw data;
+      }
+    })
+  );
+}
+
+export function leaveGame(id) {
+  return fetch(`/api/game/${id}/leave`, {
+    method: "POST"
+  }).then((response) =>
+    response.json().then((data) => {
+      if (response.ok) {
+        return data;
+      } else {
+        throw data;
+      }
+    })
+  );
+}
+
 let gameUpdatesSource = null;
 
-export function subscribeOnGame(id) {
+const gameId$ = authObservable
+  .pipe(map((value) => value?.user?.gameId))
+  .pipe(distinctUntilChanged());
+
+gameId$.subscribe((gameId) => {
+  if (gameId) {
+    startGameUpdatesSubscription(gameId);
+  }
+});
+
+export function startGameUpdatesSubscription(id) {
   gameUpdatesSource?.close();
   gameUpdatesSource = new EventSource(`/api/game/${id}/subscribe`);
 
@@ -143,7 +195,11 @@ export function subscribeOnGame(id) {
   };
 
   gameUpdatesSource.onmessage = (evt) => {
-    console.log("message", evt);
+    gameStore.updateState({
+      type: GameAction.GAME_UPDATE_SUCCESS,
+      payload: JSON.parse(evt.data),
+      error: null
+    });
   };
 
   gameUpdatesSource.onerror = (error) => {

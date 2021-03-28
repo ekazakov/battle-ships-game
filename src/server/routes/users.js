@@ -12,11 +12,11 @@ async function routes(fastify) {
     }
   });
 
-  fastify.get("/api/profile", async (request, reply) => {
+  fastify.get("/api/users/:id", async (request, reply) => {
     try {
-      const userId = getUserIdFromCookie(request.cookies.auth);
+      const { id } = request.params;
       // TODO: handle 404, user maybe deleted asynchronously
-      const user = await getUserById(userId);
+      const user = await getUserById(id);
       return reply.send(user.getInfo());
     } catch (e) {
       reply.code(400);

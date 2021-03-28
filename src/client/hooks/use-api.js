@@ -1,60 +1,33 @@
 // TODO: use https://react-query.tanstack.com/
-import { useState } from "react";
+import { useEffect } from "react";
+import { BehaviorSubject } from "rxjs";
 
-export function useApi(url, options) {
-  const [status, setStatus] = useState("idle");
-  const [error, setError] = useState(null);
-  const [data, setData] = useState(null);
+const observablesCache = {};
 
-  async function request(body) {
-    let response = null;
-    setStatus(() => "loading");
-    setError(() => null);
-
-    try {
-      response = await fetch(url, {
-        method: options.method || "GET",
-        body: JSON.stringify(body),
-        headers: Object.assign(
-          {},
-          {
-            "Content-Type": "application/json; charset=utf-8"
-          },
-          options.headers
-        )
-      });
-    } catch (err) {
-      console.log(">>> ", error);
-      err.networkError = true;
-      setStatus(() => "failed");
-      setError(() => err);
-      setData(() => null);
-      console.error(error);
-      return;
-    }
-
-    const payload = await response.json();
-
-    if (response.status >= 400) {
-      setStatus(() => "failed");
-      setError(() => payload);
-      setData(() => null);
-      console.error(payload);
-      return;
-    }
-
-    setStatus(() => "success");
-    setError(() => null);
-    setData(() => payload);
+export function useApiObservable(url, options) {
+  if (!observablesCache[url]) {
+    observablesCache[url] = new BehaviorSubject({
+      status: "idle",
+      value: null,
+      error: null
+    });
   }
 
-  return {
-    request: (...args) => {
-      // noinspection JSIgnoredPromiseFromCall
-      request(...args);
-    },
-    status,
-    error,
-    data
-  };
+  useEffect(() => {
+    (async () => {
+      const subject = observablesCache[url];
+
+      subject.next({ ...subject.getValue(), status: "loading" });
+      const response = await fetch(url, options);
+      const data = await response.json();
+
+      if (response.ok) {
+        subject.next({ status: "success", value: data, error: null });
+      } else {
+        subject.next({ status: "failure", value: null, error: data });
+      }
+    })();
+  }, [url, options]);
+
+  return observablesCache[url];
 }

@@ -117,7 +117,7 @@ exports.Game = class Game extends Observer {
       this._machine.initialize(ownerId);
     }
     this._machine.onStateTransition = () => {
-      this._notify("update", this.getGameState());
+      this._notify("update", this.getGameStateForPlayer());
     };
   }
 
@@ -133,14 +133,22 @@ exports.Game = class Game extends Observer {
     };
   }
 
+  getOwnerId() {
+    return this._ownerId;
+  }
+
+  getSecondPlayerId() {
+    return this._machine.playerBid;
+  }
+
   getState() {
     return getState(this._machine);
   }
 
   isOver() {
     return (
-      this.getGameState() === States.DESTROYED ||
-      this.getGameState() === States.FINISHED
+      this.getGameStateForPlayer() === States.DESTROYED ||
+      this.getGameStateForPlayer() === States.FINISHED
     );
   }
 
@@ -209,14 +217,25 @@ exports.Game = class Game extends Observer {
     };
   }
 
-  getGameState() {
+  getGameStateForPlayer(playerId) {
+    const ownerId = this._ownerId;
+    const secondPlayerId = this._machine.playerBid;
     const current = this.getCurrentPlayer();
     const waiting = this.getWaitingPlayer();
-    const currentBoard = this.getBoard(current);
-    const waitingBoard = this.getBoard(waiting);
-    const secondPlayerId = this._machine.playerBid;
-    const winnerId =
-      waitingBoard?.isAllShipsDestroyed() ?? false ? current : null;
+    const ownerBoard = this.getBoard(ownerId);
+    const secondPlayerBoard = this.getBoard(secondPlayerId);
+
+    const ownBoard = ownerId === playerId ? ownerBoard : secondPlayerBoard;
+    const enemyBoard = ownerId === playerId ? secondPlayerBoard : ownerBoard;
+
+    const isAllOwnerShipsDestroyed = ownerBoard?.isAllShipsDestroyed() ?? false;
+    const isAllSecondPlayerShipsDestroyed =
+      secondPlayerBoard?.isAllShipsDestroyed() ?? false;
+    const winnerId = isAllOwnerShipsDestroyed
+      ? secondPlayerId
+      : isAllSecondPlayerShipsDestroyed
+      ? ownerId
+      : null;
 
     return {
       id: this.getId(),
@@ -224,10 +243,10 @@ exports.Game = class Game extends Observer {
       winnerId,
       current,
       waiting,
-      ownerId: this._ownerId,
+      ownerId,
       secondPlayerId,
-      ownBoard: currentBoard?.getSnapshot() ?? null,
-      enemyBoard: waitingBoard?.getPublicSnapshot() ?? null
+      ownBoard: ownBoard?.getSnapshot(),
+      enemyBoard: enemyBoard?.getPublicSnapshot()
     };
   }
 

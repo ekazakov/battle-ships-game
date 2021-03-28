@@ -104,7 +104,7 @@ describe("Storage", () => {
       await storage.addGame(game);
 
       const fetchedGame = await storage.getGameById(game.getId());
-      expect(fetchedGame.getGameState()).toEqual(game.getGameState());
+      expect(fetchedGame.getGameState()).toEqual(game.getGameStateForPlayer());
     });
 
     describe("List Games", () => {
@@ -117,7 +117,7 @@ describe("Storage", () => {
           Game.createGame(newUser2.getId())
         ];
         await Promise.all(gamesList.map((g) => storage.addGame(g)));
-        games = gamesList.map((g) => g.getGameState());
+        games = gamesList.map((g) => g.getGameStateForPlayer());
       });
 
       afterEach(async () => {
@@ -126,7 +126,7 @@ describe("Storage", () => {
 
       it("should return list of all games", async () => {
         const list = (await storage.getGames()).map((game) =>
-          game.getGameState()
+          game.getGameStateForPlayer()
         );
         expect(list).toEqual(games);
       });

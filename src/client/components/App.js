@@ -45,7 +45,11 @@ export function App() {
           </Route>
 
           <Route path="/game-list" component={GameList} />
-          <PrivateRoute path="/game" exact component={Game} />
+          <PrivateRoute
+            path="/game"
+            exact
+            render={(props) => <Game {...props} />}
+          />
         </Switch>
       </BrowserRouter>
     </div>

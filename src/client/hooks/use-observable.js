@@ -17,7 +17,6 @@ export function useUpdate() {
 
 // TODO: use ref to keep value and prevent excessive rerenders
 export const useObservable = (observable) => {
-  // const [state, setUpdate] = useState({ lastValue: emptyValue });
   const update = useUpdate();
 
   const state = useMemo(() => {

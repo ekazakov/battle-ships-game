@@ -12,6 +12,7 @@ const {
   leaveGame
 } = require("../services/game");
 
+// TODO: use https://github.com/snd/url-pattern for testing urls
 const anAuthorizedAccessList = ["/api/game/list"];
 
 async function routes(fastify) {
@@ -52,7 +53,7 @@ async function routes(fastify) {
     try {
       const userId = getUserIdFromCookie(request.cookies.auth);
       const game = await createNewGame(userId);
-      return game.getGameState();
+      return game.getGameStateForPlayer();
     } catch (error) {
       console.log(error);
       reply.code(400);
@@ -150,11 +151,36 @@ async function routes(fastify) {
     }
   });
 
+  fastify.get("/api/game/:id/other_player", async (request, reply) => {
+    try {
+      const game = await getGameById(request.params.id);
+
+      if (!game) {
+        reply.code(404);
+        return reply.send(new Error("Game doesn't exits"));
+      }
+
+      const userId = game.getSecondPlayerId();
+      if (userId) {
+        const user = await getUserById(userId);
+
+        if (user) {
+          return reply.send(user.getInfo());
+        }
+      }
+      return reply.send();
+    } catch (e) {
+      reply.code(400);
+      return reply.send(e);
+    }
+  });
+
   fastify.get("/api/game/:id/subscribe", async (request, reply) => {
     try {
       const {
         params: { id }
       } = request;
+      const userId = getUserIdFromCookie(request.cookies.auth);
 
       const game = await getGameById(id);
 
@@ -165,11 +191,13 @@ async function routes(fastify) {
 
       reply.sse(
         (async function* source() {
-          const evt1 = { data: JSON.stringify(game.getGameState()) };
+          const evt1 = {
+            data: JSON.stringify(game.getGameStateForPlayer(userId))
+          };
           yield evt1;
 
           while (!game.isOver()) {
-            const gameState = await nextGameState(game.getId());
+            const gameState = await nextGameState(game.getId(), userId);
             const evt = { data: JSON.stringify(gameState) };
             yield evt;
           }

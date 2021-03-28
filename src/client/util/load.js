@@ -10,7 +10,7 @@ function LoadingContainer({
   renderError
 }) {
   const lastUpdate = useObservable(observable);
-  console.log("lastUpdate:", lastUpdate);
+  // console.log("lastUpdate:", lastUpdate);
   if (isEmptyValue(lastUpdate) || lastUpdate.status === "idle") {
     return renderIdle ? <>{renderIdle()}</> : <>idle</>;
   }

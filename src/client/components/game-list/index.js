@@ -8,19 +8,20 @@ import {
 import { useEffect } from "react";
 import { useObservable } from "../../hooks/use-observable";
 import { load } from "../../util/load";
-import { authObservable, isAuthorized } from "../../observables/auth";
+import { authObservable, isAuthorized, profile } from "../../observables/auth";
 
 function Item({ game }) {
   const authState = useObservable(authObservable);
-  const onClick = () => {
-    joinGame(game.id);
+  const onJoinClick = async () => {
+    await joinGame(game.id);
+    await profile();
   };
 
   const showJoinButton =
     isAuthorized(authState) &&
     authState.user.id !== game.ownerId &&
     game.state === "awaiting";
-  const startButton = <button onClick={onClick}>Join</button>;
+  const startButton = <button onClick={onJoinClick}>Join</button>;
 
   return (
     <li>
@@ -35,8 +36,9 @@ export function GameList() {
 
   console.log("game", game);
 
-  const onCreateNewButtonClick = () => {
-    createGame();
+  const onCreateNewButtonClick = async () => {
+    await createGame();
+    await profile();
   };
   const onRefreshGamesButtonClick = () => {
     fetchGamesList();
