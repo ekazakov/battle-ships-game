@@ -5,6 +5,7 @@ import { combineLatest } from "rxjs";
 import { map } from "rxjs/operators";
 import { compareStatuses } from "../util/compare-statuses";
 
+// TODO: reset when player(s) left or logout
 export const gameInfoObservable = combineLatest([
   gameStoreObservable,
   otherPlayerObservable,
@@ -36,6 +37,6 @@ export const gameInfoObservable = combineLatest([
   })
 );
 
-foo.subscribe((...args) => {
+gameInfoObservable.subscribe((...args) => {
   console.log("Full game info:", ...args);
 });

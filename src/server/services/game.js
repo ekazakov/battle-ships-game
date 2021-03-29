@@ -16,10 +16,7 @@ async function createNewGame(userId) {
   user.setGame(game.getId());
   await Context.storage.addGame(game);
   await Context.storage.updateUser(user);
-
-  game.addObserver((evt, payload) => {
-    mediator.emit(`game:${game.getId()}:updated`, payload);
-  });
+  mediator.emit(`game:${game.getId()}:updated`, game);
 
   return game;
 }

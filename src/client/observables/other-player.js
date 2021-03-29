@@ -1,25 +1,20 @@
 import { createApiObservable } from "../util/api-observable";
 import { gameStoreObservable } from "./game-actions";
-import { distinct, pluck, skipWhile } from "rxjs/operators";
+import { distinct, skipWhile } from "rxjs/operators";
 
 const { sendRequest, observable } = createApiObservable();
 
 export const otherPlayerObservable = observable;
-export const getUser = (id) => sendRequest(`/api/game/${id}/other_player`);
+export const getOtherPlayer = (id) =>
+  sendRequest(`/api/game/${id}/other_player`);
 
 const gameStarted$ = gameStoreObservable.pipe(
-  // TODO: change status filter
   skipWhile(({ status }) => status !== "success"),
-  pluck(...["value", "secondPlayerId"]),
-  distinct()
+  skipWhile(({ value }) => value?.secondPlayerId === null),
+  distinct(({ value }) => value.secondPlayerId)
 );
 
-// TODO: handle case for second player,
-gameStarted$.subscribe((secondPlayerId) => {
-  throw Error("TODO: handle case for second player");
-  // TODO: use gameId to fetch other player
-  console.log("SecondPlayerId:", secondPlayerId);
-  // if (secondPlayerId) {
-  //   getUser(secondPlayerId);
-  // }
+gameStarted$.subscribe(({ value: game }) => {
+  console.log(`Fetching other player for game: ${game.id}`);
+  getOtherPlayer(game.id);
 });

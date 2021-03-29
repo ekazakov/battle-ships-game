@@ -153,61 +153,68 @@ async function routes(fastify) {
 
   fastify.get("/api/game/:id/other_player", async (request, reply) => {
     try {
+      const userId = getUserIdFromCookie(request.cookies.auth);
       const game = await getGameById(request.params.id);
-
       if (!game) {
         reply.code(404);
         return reply.send(new Error("Game doesn't exits"));
       }
 
-      const userId = game.getSecondPlayerId();
-      if (userId) {
-        const user = await getUserById(userId);
+      const ownerId = game.getOwnerId();
+      const secondPlayerId = game.getSecondPlayerId();
+      const otherPlayerId = userId === ownerId ? secondPlayerId : ownerId;
+
+      if (otherPlayerId) {
+        const user = await getUserById(otherPlayerId);
 
         if (user) {
           return reply.send(user.getInfo());
         }
       }
-      return reply.send();
+      return reply.send({});
     } catch (e) {
       reply.code(400);
       return reply.send(e);
     }
   });
 
-  fastify.get("/api/game/:id/subscribe", async (request, reply) => {
-    try {
-      const {
-        params: { id }
-      } = request;
-      const userId = getUserIdFromCookie(request.cookies.auth);
+  fastify.get("/api/game/:id/subscribe", (request, reply) => {
+    const {
+      params: { id }
+    } = request;
+    const userId = getUserIdFromCookie(request.cookies.auth);
 
-      const game = await getGameById(id);
+    getGameById(id)
+      .then((game) => {
+        if (!game) {
+          reply.code(400);
+          return reply.send(new Error("Game doesn't exist"));
+        }
 
-      if (!game) {
+        reply.sse(
+          (async function* source() {
+            const evt1 = {
+              data: JSON.stringify(game.getGameStateForPlayer(userId))
+            };
+            yield evt1;
+
+            while (!game.isOver()) {
+              // TODO: fix memory leak
+              const gameState = await nextGameState(game.getId(), userId);
+              console.log(
+                `>> [${userId}] game transitioned to: ${gameState.state}`
+              );
+              const evt = { data: JSON.stringify(gameState) };
+              yield evt;
+            }
+          })()
+        );
+      })
+      .catch((e) => {
+        console.error(e);
         reply.code(400);
-        return reply.send(new Error("Game doesn't exist"));
-      }
-
-      reply.sse(
-        (async function* source() {
-          const evt1 = {
-            data: JSON.stringify(game.getGameStateForPlayer(userId))
-          };
-          yield evt1;
-
-          while (!game.isOver()) {
-            const gameState = await nextGameState(game.getId(), userId);
-            const evt = { data: JSON.stringify(gameState) };
-            yield evt;
-          }
-        })()
-      );
-    } catch (e) {
-      console.error(e);
-      reply.code(400);
-      return reply.send(e);
-    }
+        return reply.send(e);
+      });
   });
 }
 
