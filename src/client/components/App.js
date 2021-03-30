@@ -1,10 +1,10 @@
 import React from "react";
 import { Switch, Route, BrowserRouter, Redirect } from "react-router-dom";
 import { Global, css } from "@emotion/react";
-import { Game } from "./game";
 import { PrivateRoute } from "./private-route";
 import { LoginPage } from "../pages/login-page";
 import { GameListPage } from "../pages/games-list-page";
+import { GamePage } from "../pages/game-page";
 
 const globalStyles = css`
   html,
@@ -34,7 +34,7 @@ export function App() {
           <PrivateRoute
             path="/game"
             exact
-            render={(props) => <Game {...props} />}
+            render={(props) => <GamePage {...props} />}
           />
         </Switch>
       </BrowserRouter>

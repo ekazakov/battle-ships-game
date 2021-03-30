@@ -171,7 +171,8 @@ async function routes(fastify) {
           return reply.send(user.getInfo());
         }
       }
-      return reply.send({});
+      reply.code(204);
+      return reply.send();
     } catch (e) {
       reply.code(400);
       return reply.send(e);

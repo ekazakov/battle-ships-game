@@ -10,8 +10,8 @@ export function createApiObservable(options = {}) {
   async function sendRequest(url, requestOptions = {}) {
     subject.next({ ...subject.getValue(), status: "loading" });
     const response = await fetch(url, { ...options, ...requestOptions });
-    const data = await response.json();
 
+    const data = response.status !== 204 ? await response.json() : null;
     if (response.ok) {
       subject.next({ status: "success", value: data, error: null });
     } else {
@@ -21,6 +21,6 @@ export function createApiObservable(options = {}) {
 
   return {
     sendRequest,
-    observable: subject.asObservable()
+    subject
   };
 }

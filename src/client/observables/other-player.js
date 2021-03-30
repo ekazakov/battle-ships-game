@@ -2,16 +2,17 @@ import { createApiObservable } from "../util/api-observable";
 import { gameStoreObservable } from "./game-actions";
 import { distinct, skipWhile } from "rxjs/operators";
 
-const { sendRequest, observable } = createApiObservable();
+const { sendRequest, subject } = createApiObservable();
 
-export const otherPlayerObservable = observable;
+export const otherPlayerObservable = subject.asObservable();
+
 export const getOtherPlayer = (id) =>
   sendRequest(`/api/game/${id}/other_player`);
 
 const gameStarted$ = gameStoreObservable.pipe(
   skipWhile(({ status }) => status !== "success"),
-  skipWhile(({ value }) => value?.secondPlayerId === null),
-  distinct(({ value }) => value.secondPlayerId)
+  skipWhile(({ value }) => value?.enemyId === null),
+  distinct(({ value }) => value.enemyId)
 );
 
 gameStarted$.subscribe(({ value: game }) => {

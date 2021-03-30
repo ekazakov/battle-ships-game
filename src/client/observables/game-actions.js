@@ -1,6 +1,6 @@
 import { BehaviorSubject } from "rxjs";
 import { Store } from "../store/store";
-import { authObservable } from "./auth";
+import { authStoreObservable } from "./auth";
 import { distinctUntilChanged, map } from "rxjs/operators";
 
 const gamesListSubject = new BehaviorSubject({
@@ -176,7 +176,7 @@ export function leaveGame(id) {
 
 let gameUpdatesSource = null;
 
-const gameId$ = authObservable
+const gameId$ = authStoreObservable
   .pipe(map((value) => value?.user?.gameId))
   .pipe(distinctUntilChanged());
 

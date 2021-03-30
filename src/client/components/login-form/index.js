@@ -66,7 +66,7 @@ export function AuthForm() {
 
   const onLoginChange = (evt) => setLogin(() => evt.target.value);
   const onPasswordChange = (evt) => setPassword(() => evt.target.value);
-  const lastUpdate = useObservable(auth.authObservable);
+  const lastUpdate = useObservable(auth.authStoreObservable);
 
   const onSubmit = (evt) => {
     evt.preventDefault();
@@ -112,7 +112,7 @@ export function AuthForm() {
           </LoginButton>
         </div>
       </form>
-      {load(auth.authObservable)}
+      {load(auth.authStoreObservable)}
     </AuthFormContent>
   );
 }

@@ -1,18 +1,21 @@
 import { Redirect, Route } from "react-router-dom";
-import { authObservable, isAuthorized } from "../../observables/auth";
-import { useObservable } from "../../hooks/use-observable";
+import { authObservable, AuthStatus } from "../../observables/auth";
+import { load } from "../../util/load";
 
 export function PrivateRoute({ render, ...otherProps }) {
-  const authState = useObservable(authObservable);
   return (
     <Route
       {...otherProps}
       render={(props) => {
-        if (isAuthorized(authState)) {
-          return render(props);
-        }
+        return load(authObservable, {
+          render(authState) {
+            if (authState === AuthStatus.AUTHORIZED) {
+              return render(props);
+            }
 
-        return <Redirect to="/login" />;
+            return <Redirect to="/login" />;
+          }
+        });
       }}
     />
   );

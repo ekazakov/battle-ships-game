@@ -17,7 +17,7 @@ const subject = new BehaviorSubject({
   error: null
 });
 
-const authObservable = subject.asObservable();
+const authStoreObservable = subject.asObservable();
 
 const headers = {
   "Content-Type": "application/json; charset=utf-8"
@@ -25,10 +25,9 @@ const headers = {
 
 function login(body) {
   subject.next({
+    ...subject.getValue(),
     status: "loading",
-    error: null,
-    authState: null,
-    user: null
+    error: null
   });
 
   return fetch("/api/login", {
@@ -65,9 +64,8 @@ function login(body) {
 
 function register(body) {
   subject.next({
+    ...subject.getValue(),
     status: "loading",
-    authState: null,
-    user: null,
     error: null
   });
 
@@ -106,10 +104,9 @@ function register(body) {
 
 function logout() {
   subject.next({
+    ...subject.getValue(),
     status: "loading",
-    authState: null,
-    error: null,
-    user: null
+    error: null
   });
 
   fetch("/api/logout", { method: "POST" })
@@ -117,7 +114,8 @@ function logout() {
       subject.next({
         authState: AuthStatus.UNAUTHORIZED,
         status: "success",
-        error: null
+        error: null,
+        user: null
       });
     })
     .catch((error) =>
@@ -131,8 +129,8 @@ function logout() {
 
 function checkAuth() {
   subject.next({
-    status: "loading",
-    authState: null
+    ...subject.getValue(),
+    status: "loading"
   });
 
   fetch("/api/auth_check")
@@ -165,8 +163,8 @@ function checkAuth() {
 
 export function profile() {
   subject.next({
-    status: "loading",
-    authState: null
+    ...subject.getValue(),
+    status: "loading"
   });
 
   fetch("/api/profile")
@@ -181,6 +179,7 @@ export function profile() {
           });
         } else {
           subject.next({
+            ...subject.getValue(),
             status: "success",
             authState: AuthStatus.UNAUTHORIZED,
             error: null
@@ -204,17 +203,25 @@ function reset() {
   });
 }
 
-const profileObservable = authObservable.pipe(
+const profileObservable = authStoreObservable.pipe(
   map((state) => {
     return { status: state.status, error: state.error, value: state.user };
   })
 );
+const authObservable = authStoreObservable.pipe(
+  map((state) => {
+    const status = state.status === "error" ? "success" : state.status;
+    return { status, error: null, value: state.authState };
+  })
+);
+
 export {
   login,
   register,
   logout,
   reset,
   checkAuth,
-  authObservable,
-  profileObservable
+  authStoreObservable,
+  profileObservable,
+  authObservable
 };

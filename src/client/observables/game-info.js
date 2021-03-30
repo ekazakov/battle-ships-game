@@ -2,10 +2,9 @@ import { gameStoreObservable } from "./game-actions";
 import { otherPlayerObservable } from "./other-player";
 import { profileObservable } from "./auth";
 import { combineLatest } from "rxjs";
-import { map } from "rxjs/operators";
+import { filter, map } from "rxjs/operators";
 import { compareStatuses } from "../util/compare-statuses";
 
-// TODO: reset when player(s) left or logout
 export const gameInfoObservable = combineLatest([
   gameStoreObservable,
   otherPlayerObservable,
@@ -17,9 +16,11 @@ export const gameInfoObservable = combineLatest([
 
     return { status: commonStatus, value: items.map(({ value }) => value) };
   }),
+  filter(({ value }) => value.every(Boolean)),
   map((state) => {
     if (state.status === "success") {
       const [game, otherPlayer, profile] = state.value;
+      console.log("otherPlayer", otherPlayer);
 
       return {
         ...state,

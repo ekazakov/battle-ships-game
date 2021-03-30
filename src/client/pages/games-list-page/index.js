@@ -8,11 +8,15 @@ import {
 import { useEffect } from "react";
 import { useObservable } from "../../hooks/use-observable";
 import { load } from "../../util/load";
-import { authObservable, isAuthorized, profile } from "../../observables/auth";
+import {
+  authStoreObservable,
+  isAuthorized,
+  profile
+} from "../../observables/auth";
 import { PageLayout } from "../../components/page-layout";
 
 function Item({ game }) {
-  const authState = useObservable(authObservable);
+  const authState = useObservable(authStoreObservable);
   const onJoinClick = async () => {
     await joinGame(game.id);
     await profile();

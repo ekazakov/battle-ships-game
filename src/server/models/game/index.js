@@ -244,7 +244,8 @@ exports.Game = class Game extends Observer {
       current,
       waiting,
       ownerId,
-      secondPlayerId,
+      ownId: playerId,
+      enemyId: ownerId === playerId ? secondPlayerId : ownerId,
       ownBoard: ownBoard?.getSnapshot(),
       enemyBoard: enemyBoard?.getPublicSnapshot()
     };

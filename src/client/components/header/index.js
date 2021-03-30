@@ -1,5 +1,5 @@
 import { useObservable } from "../../hooks/use-observable";
-import { authObservable, isAuthorized } from "../../observables/auth";
+import { authStoreObservable, isAuthorized } from "../../observables/auth";
 import { LogoutButton } from "../logout-button";
 import styled from "@emotion/styled";
 import { NavLink } from "react-router-dom";
@@ -50,7 +50,7 @@ function Navigation() {
 }
 
 export function Header() {
-  const authState = useObservable(authObservable);
+  const authState = useObservable(authStoreObservable);
   const userName = authState?.user?.name;
 
   return (

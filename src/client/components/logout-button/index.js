@@ -1,8 +1,8 @@
-import { authObservable, logout } from "../../observables/auth";
+import { authStoreObservable, logout } from "../../observables/auth";
 import { useObservable } from "../../hooks/use-observable";
 
 export function LogoutButton() {
-  const authState = useObservable(authObservable);
+  const authState = useObservable(authStoreObservable);
   const onClick = () => {
     logout();
   };
