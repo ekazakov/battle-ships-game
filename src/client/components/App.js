@@ -1,50 +1,36 @@
 import React from "react";
-import { AuthForm } from "./login-form";
-import {
-  Switch,
-  Route,
-  BrowserRouter,
-  Redirect,
-  NavLink
-} from "react-router-dom";
-import { useObservable } from "../hooks/use-observable";
-import { authObservable, isAuthorized } from "../observables/auth";
+import { Switch, Route, BrowserRouter, Redirect } from "react-router-dom";
 import { Global, css } from "@emotion/react";
-import { GameList } from "./game-list";
 import { Game } from "./game";
 import { PrivateRoute } from "./private-route";
-import { LogoutButton } from "./logout-button";
+import { LoginPage } from "../pages/login-page";
+import { GameListPage } from "../pages/games-list-page";
 
 const globalStyles = css`
-  font-family: "Helvetica Neue", Arial, sans-serif;
+  html,
+  body {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    margin: 0;
+  }
+
+  a {
+    color: black;
+  }
 `;
 
 export function App() {
-  const authState = useObservable(authObservable);
-
   return (
     <div>
       <Global styles={globalStyles} />
 
       <BrowserRouter>
-        {!isAuthorized(authState) && <AuthForm />}
-        {isAuthorized(authState) && <LogoutButton />}
-
-        <ul>
-          <li>
-            <NavLink to="/game-list">Games</NavLink>
-          </li>
-
-          <li>
-            <NavLink to="/game">Game</NavLink>
-          </li>
-        </ul>
         <Switch>
           <Route exact path="/">
             <Redirect to="/game-list" />
           </Route>
 
-          <Route path="/game-list" component={GameList} />
+          <Route path="/login" component={LoginPage} />
+          <Route path="/game-list" component={GameListPage} />
           <PrivateRoute
             path="/game"
             exact

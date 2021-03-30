@@ -12,7 +12,7 @@ export function PrivateRoute({ render, ...otherProps }) {
           return render(props);
         }
 
-        return <Redirect to="/" />;
+        return <Redirect to="/login" />;
       }}
     />
   );

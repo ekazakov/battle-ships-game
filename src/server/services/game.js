@@ -34,7 +34,9 @@ async function nextGameState(gameId, userId) {
 
 async function getGameById(id) {
   const game = await Context.storage.getGameById(id);
-  mediator.emit(`game:${game?.getId()}:updated`, game);
+  game.addObserver(() => {
+    mediator.emit(`game:${game?.getId()}:updated`, game);
+  });
   return game;
 }
 

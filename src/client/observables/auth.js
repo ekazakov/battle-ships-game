@@ -31,7 +31,7 @@ function login(body) {
     user: null
   });
 
-  fetch("/api/login", {
+  return fetch("/api/login", {
     method: "POST",
     headers,
     body: JSON.stringify(body)
@@ -71,7 +71,7 @@ function register(body) {
     error: null
   });
 
-  fetch("/api/register", {
+  return fetch("/api/register", {
     method: "POST",
     headers,
     body: JSON.stringify(body)

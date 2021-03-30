@@ -8,10 +8,8 @@ export function LogoutButton() {
   };
 
   const loading = authState.status === "loading";
-  const userName = authState?.user?.name;
   return (
     <div>
-      User: <b>{userName}</b>
       <button type="button" disabled={loading} onClick={onClick}>
         Logout
       </button>
