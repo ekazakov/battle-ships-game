@@ -11,9 +11,10 @@ const { Storage } = require("../../storage");
 
 describe("Game API", () => {
   let fastify = null;
+  let storage = null;
 
   beforeEach(async () => {
-    const storage = await Storage.createMemoryStore();
+    storage = await Storage.createMemoryStore();
     fastify = await buildFastify({ storage });
   });
 
@@ -32,6 +33,10 @@ describe("Game API", () => {
       });
     });
 
+    afterEach(async () => {
+      await Storage.resetMemoryStore(storage);
+    });
+
     it("should create new game", async () => {
       expect.hasAssertions();
 
@@ -42,19 +47,16 @@ describe("Game API", () => {
           cookie: buildAuthCookie(aUserId)
         }
       });
-
-      expect(res.statusCode).toBe(200);
-      expect(res.json()).toEqual({
+      expect(res.json()).toMatchSnapshot({
         id: "game_1",
         state: "awaiting",
         ownerId: "user_1",
-        secondPlayerId: null,
-        current: null,
         enemyBoard: null,
-        ownBoard: null,
+        current: null,
         waiting: null,
         winnerId: null
       });
+      expect(res.statusCode).toBe(200);
     });
 
     it("should return error if user is not authorized", async () => {

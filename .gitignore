@@ -4,4 +4,4 @@ dist
 *.log
 yarn.lock
 .idea
-database.json
+backend/database.json

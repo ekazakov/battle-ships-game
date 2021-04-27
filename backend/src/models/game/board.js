@@ -1,9 +1,5 @@
-const { ShootResult } = require("../../../common/constants");
-const {
-  BOARD_SIZE,
-  Direction,
-  ShipType
-} = require("../../../common/constants");
+const { ShootResult } = require("../../utils/constants");
+const { BOARD_SIZE, Direction, ShipType } = require("../../utils/constants");
 const { Cell } = require("./cell");
 const { Ship } = require("./ship");
 
@@ -20,21 +16,24 @@ function createCells(size) {
   return cells;
 }
 
-const defaultShips = [
-  new Ship(ShipType.BATTLE_SHIP, Direction.HORIZONTAL, { x: 6, y: 0 }),
-  new Ship(ShipType.DESTROYER, Direction.VERTICAL, { x: 3, y: 0 }),
-  new Ship(ShipType.DESTROYER, Direction.HORIZONTAL, { x: 1, y: 4 }),
-  new Ship(ShipType.FRIGATE, Direction.VERTICAL, { x: 0, y: 0 }),
-  new Ship(ShipType.FRIGATE, Direction.VERTICAL, { x: 9, y: 2 }),
-  new Ship(ShipType.FRIGATE, Direction.VERTICAL, { x: 8, y: 8 }),
-  new Ship(ShipType.BOAT, Direction.VERTICAL, { x: 6, y: 5 }),
-  new Ship(ShipType.BOAT, Direction.VERTICAL, { x: 3, y: 8 }),
-  new Ship(ShipType.BOAT, Direction.VERTICAL, { x: 5, y: 8 }),
-  new Ship(ShipType.BOAT, Direction.VERTICAL, { x: 0, y: 9 })
-];
+function createDefaultShips() {
+  return [
+    new Ship(ShipType.BATTLE_SHIP, Direction.HORIZONTAL, { x: 6, y: 0 }),
+    new Ship(ShipType.DESTROYER, Direction.VERTICAL, { x: 3, y: 0 }),
+    new Ship(ShipType.DESTROYER, Direction.HORIZONTAL, { x: 1, y: 4 }),
+    new Ship(ShipType.FRIGATE, Direction.VERTICAL, { x: 0, y: 0 }),
+    new Ship(ShipType.FRIGATE, Direction.VERTICAL, { x: 9, y: 2 }),
+    new Ship(ShipType.FRIGATE, Direction.VERTICAL, { x: 8, y: 8 }),
+    new Ship(ShipType.BOAT, Direction.VERTICAL, { x: 6, y: 5 }),
+    new Ship(ShipType.BOAT, Direction.VERTICAL, { x: 3, y: 8 }),
+    new Ship(ShipType.BOAT, Direction.VERTICAL, { x: 5, y: 8 }),
+    new Ship(ShipType.BOAT, Direction.VERTICAL, { x: 0, y: 9 })
+  ];
+}
 
 exports.Board = class Board {
-  static createBoard(ships = defaultShips) {
+  static createBoard(ships) {
+    ships = ships || createDefaultShips();
     const board = new Board(BOARD_SIZE);
     ships.forEach((ship) => board.addShip(ship));
     return board;

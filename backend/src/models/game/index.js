@@ -4,11 +4,11 @@ const {
   getState,
   STATES,
   STARTING_STATE
-} = require("../../../common/state-machine");
+} = require("../../utils/state-machine");
 const { getNextId } = require("../../utils/id-generator");
-const { Observer } = require("../../../common/observer");
+const { Observer } = require("../../utils/observer");
 const { Board } = require("./board");
-const { ShootResult } = require("../../../common/constants.js");
+const { ShootResult } = require("../../utils/constants.js");
 
 const States = {
   IDLE: "idle",
@@ -217,6 +217,10 @@ exports.Game = class Game extends Observer {
     };
   }
 
+  getFullGameState() {
+    return this._getSnapshot();
+  }
+
   getGameStateForPlayer(playerId) {
     const ownerId = this._ownerId;
     const secondPlayerId = this._machine.playerBid;
@@ -228,9 +232,9 @@ exports.Game = class Game extends Observer {
     const ownBoard = ownerId === playerId ? ownerBoard : secondPlayerBoard;
     const enemyBoard = ownerId === playerId ? secondPlayerBoard : ownerBoard;
 
-    const isAllOwnerShipsDestroyed = ownerBoard?.isAllShipsDestroyed() ?? false;
+    const isAllOwnerShipsDestroyed = ownerBoard?.isAllShipsDestroyed() || false;
     const isAllSecondPlayerShipsDestroyed =
-      secondPlayerBoard?.isAllShipsDestroyed() ?? false;
+      secondPlayerBoard?.isAllShipsDestroyed() || false;
     const winnerId = isAllOwnerShipsDestroyed
       ? secondPlayerId
       : isAllSecondPlayerShipsDestroyed
@@ -247,7 +251,7 @@ exports.Game = class Game extends Observer {
       ownId: playerId,
       enemyId: ownerId === playerId ? secondPlayerId : ownerId,
       ownBoard: ownBoard?.getSnapshot(),
-      enemyBoard: enemyBoard?.getPublicSnapshot()
+      enemyBoard: enemyBoard?.getPublicSnapshot() || null
     };
   }
 

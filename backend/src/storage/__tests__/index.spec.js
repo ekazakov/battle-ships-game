@@ -104,7 +104,7 @@ describe("Storage", () => {
       await storage.addGame(game);
 
       const fetchedGame = await storage.getGameById(game.getId());
-      expect(fetchedGame.getGameState()).toEqual(game.getGameStateForPlayer());
+      expect(fetchedGame.getFullGameState()).toEqual(game.getFullGameState());
     });
 
     describe("List Games", () => {

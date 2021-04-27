@@ -53,7 +53,7 @@ async function routes(fastify) {
     try {
       const userId = getUserIdFromCookie(request.cookies.auth);
       const game = await createNewGame(userId);
-      return game.getGameStateForPlayer();
+      return game.getGameStateForPlayer(userId);
     } catch (error) {
       console.log(error);
       reply.code(400);
@@ -202,9 +202,9 @@ async function routes(fastify) {
             while (!game.isOver()) {
               // TODO: fix memory leak
               const gameState = await nextGameState(game.getId(), userId);
-              console.log(
-                `>> [${userId}] game transitioned to: ${gameState.state}`
-              );
+              // console.log(
+              //   `>> [${userId}] game transitioned to: ${gameState.state}`
+              // );
               const evt = { data: JSON.stringify(gameState) };
               yield evt;
             }

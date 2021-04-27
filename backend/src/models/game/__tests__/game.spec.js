@@ -1,5 +1,5 @@
 const { resetIds } = require("../../../utils/id-generator");
-const { Direction } = require("../../../../common/constants");
+const { Direction } = require("../../../utils/constants");
 const { Game, States } = require("../index");
 
 function createPlayer(id) {
@@ -104,14 +104,14 @@ describe("Game", function () {
         game.start();
         game.makeShot(playerA.getId(), { x: 6, y: 0 });
 
-        expect(game.getGameStateForPlayer()).toMatchSnapshot({
+        expect(game.getGameStateForPlayer("player_1")).toMatchSnapshot({
           id: "game_1",
           state: States.PLAYER_TURN,
           winnerId: null,
           current: "player_1",
           waiting: "player_2",
           ownerId: "player_1",
-          secondPlayerId: "player_2"
+          enemyId: "player_2"
         });
       });
 
@@ -120,12 +120,12 @@ describe("Game", function () {
         game.join(playerB.getId());
         game.start();
         game.makeShot(playerA.getId(), { x: 5, y: 0 });
-        expect(game.getGameStateForPlayer()).toMatchSnapshot({
+        expect(game.getGameStateForPlayer("player_1")).toMatchSnapshot({
           id: "game_1",
           state: States.PLAYER_TURN,
           winnerId: null,
           ownerId: "player_1",
-          secondPlayerId: "player_2",
+          enemyId: "player_2",
           current: "player_2",
           waiting: "player_1"
         });
@@ -146,12 +146,12 @@ describe("Game", function () {
         game.makeShot(playerA.getId(), { x: 6, y: 0 });
         game.makeShot(playerA.getId(), { x: 6, y: 0 });
 
-        expect(game.getGameStateForPlayer()).toMatchSnapshot({
+        expect(game.getGameStateForPlayer("player_1")).toMatchSnapshot({
           id: "game_1",
           state: States.PLAYER_TURN,
           winnerId: null,
           ownerId: "player_1",
-          secondPlayerId: "player_2",
+          enemyId: "player_2",
           current: "player_1",
           waiting: "player_2"
         });
@@ -236,12 +236,12 @@ describe("Game", function () {
           }
         });
 
-        expect(game.getGameStateForPlayer()).toMatchSnapshot({
+        expect(game.getGameStateForPlayer("player_1")).toMatchSnapshot({
           id: "game_1",
           state: States.FINISHED,
           winnerId: "player_1",
           ownerId: "player_1",
-          secondPlayerId: "player_2",
+          enemyId: "player_2",
           current: "player_1",
           waiting: "player_2"
         });
@@ -257,24 +257,24 @@ describe("Game", function () {
     const serialized = Game.serialize(game);
     const restoredGame = Game.deserialize(serialized);
 
-    expect(restoredGame.getGameStateForPlayer()).toMatchObject({
+    expect(restoredGame.getGameStateForPlayer("player_1")).toMatchObject({
       id: "game_1",
       state: States.AWAITING_START,
       winnerId: null,
       ownerId: "player_1",
-      secondPlayerId: "player_2",
+      enemyId: "player_2",
       current: null,
       waiting: null
     });
 
     restoredGame.start();
 
-    expect(restoredGame.getGameStateForPlayer()).toMatchObject({
+    expect(restoredGame.getGameStateForPlayer("player_1")).toMatchObject({
       id: "game_1",
       state: States.PLAYER_TURN,
       winnerId: null,
       ownerId: "player_1",
-      secondPlayerId: "player_2",
+      enemyId: "player_2",
       current: "player_1",
       waiting: "player_2"
     });

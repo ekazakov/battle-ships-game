@@ -35,6 +35,14 @@ exports.Storage = class Storage {
     return new Storage(db);
   }
 
+  static async resetMemoryStore(
+    storage,
+    defaultData = { users: [], games: [] }
+  ) {
+    const adapter = new MemoryAsync();
+    storage._db = await initDb(adapter, defaultData);
+  }
+
   static async createFileStore(defaultData = { users: [], games: [] }) {
     const adapter = new FileAsync("database.json");
     const db = await initDb(adapter, defaultData);

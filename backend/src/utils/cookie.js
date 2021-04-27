@@ -3,7 +3,8 @@ exports.buildAuthCookie = function buildAuthCookie(id) {
 };
 
 exports.parseAuthCookie = function parseAuthCookie(cookieHeader) {
-  const [name, value] = cookieHeader.split("=");
+  const [name, cookieValue] = cookieHeader.split("=");
+  const [value] = cookieValue.split(";");
   const [prefix, id] = decodeURIComponent(value).split("#");
 
   return {

@@ -1,0 +1,11 @@
+{
+  "users": [
+    {
+      "name": "UserA",
+      "password": "password",
+      "id": "user_1",
+      "gameId": null
+    }
+  ],
+  "games": []
+}
