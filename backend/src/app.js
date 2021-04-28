@@ -1,5 +1,6 @@
 const { FastifySSEPlugin } = require("fastify-sse-v2");
 const FastifyCookiePlugin = require("fastify-cookie");
+const FastifyCors = require("fastify-cors");
 const fastifyFactory = require("fastify");
 // TODO: fix custom keywords
 // const customAjvKeywords = require("./utils/custom-ajv-keywords");
@@ -28,6 +29,7 @@ exports.buildFastify = async function buildFastify(options = {}) {
 
   fastify.register(FastifySSEPlugin);
   fastify.register(FastifyCookiePlugin);
+  fastify.register(FastifyCors, { origin: true, credentials: true });
   fastify.register(require("./routes/auth"));
   fastify.register(require("./routes/game"));
   fastify.register(require("./routes/profile"));

@@ -192,6 +192,14 @@ async function routes(fastify) {
           return reply.send(new Error("Game doesn't exist"));
         }
 
+        reply.raw.setHeader(
+          "Access-Control-Allow-Origin",
+          request.headers.origin
+        );
+        reply.raw.setHeader("access-control-allow-credentials", true);
+        reply.raw.setHeader("access-control-allow-methods", "GET");
+
+        // TODO: Update fastify-sse-v2 plugin to v2.0.4
         reply.sse(
           (async function* source() {
             const evt1 = {

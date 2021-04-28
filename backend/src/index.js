@@ -1,6 +1,6 @@
 const { buildFastify } = require("./app");
 
-const port = process.env.PORT || 8000;
+const port = process.env.PORT || 80;
 
 const start = async () => {
   const fastify = await buildFastify({
@@ -8,9 +8,8 @@ const start = async () => {
       prettyPrint: true
     }
   });
-
   try {
-    const address = await fastify.listen(port);
+    const address = await fastify.listen(port, "0.0.0.0");
     fastify.log.info(`Server listening on ${address}`);
   } catch (err) {
     fastify.log.error(err);
