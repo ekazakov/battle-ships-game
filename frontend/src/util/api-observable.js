@@ -9,7 +9,11 @@ export function createApiObservable(options = {}) {
 
   async function sendRequest(url, requestOptions = {}) {
     subject.next({ ...subject.getValue(), status: "loading" });
-    const response = await fetch(url, { ...options, ...requestOptions });
+    const response = await fetch(url, {
+      ...options,
+      ...requestOptions,
+      credentials: "include"
+    });
 
     const data = response.status !== 204 ? await response.json() : null;
     if (response.ok) {

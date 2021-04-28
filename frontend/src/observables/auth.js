@@ -1,5 +1,6 @@
 import { BehaviorSubject } from "rxjs";
 import { map } from "rxjs/operators";
+import { baseUrl } from "../util/constants";
 
 export const AuthStatus = {
   UNAUTHORIZED: "UNAUTHORIZED",
@@ -30,10 +31,11 @@ function login(body) {
     error: null
   });
 
-  return fetch("/api/login", {
+  return fetch(baseUrl + "/api/login", {
     method: "POST",
     headers,
-    body: JSON.stringify(body)
+    body: JSON.stringify(body),
+    credentials: "include"
   })
     .then((response) =>
       response.json().then((user) => {
@@ -69,10 +71,11 @@ function register(body) {
     error: null
   });
 
-  return fetch("/api/register", {
+  return fetch(baseUrl + "/api/register", {
     method: "POST",
     headers,
-    body: JSON.stringify(body)
+    body: JSON.stringify(body),
+    credentials: "include"
   })
     .then((response) =>
       response.json().then((user) => {
@@ -109,7 +112,7 @@ function logout() {
     error: null
   });
 
-  fetch("/api/logout", { method: "POST" })
+  fetch(baseUrl + "/api/logout", { method: "POST", credentials: "include" })
     .then(() => {
       subject.next({
         authState: AuthStatus.UNAUTHORIZED,
@@ -133,7 +136,7 @@ function checkAuth() {
     status: "loading"
   });
 
-  fetch("/api/auth_check")
+  fetch(baseUrl + "/api/auth_check", { credentials: "include" })
     .then((response) => {
       return response.json().then((user) => {
         if (response.ok) {
@@ -167,7 +170,7 @@ export function profile() {
     status: "loading"
   });
 
-  fetch("/api/profile")
+  fetch(baseUrl + "/api/profile", { credentials: "include" })
     .then((response) => {
       return response.json().then((user) => {
         if (response.ok) {

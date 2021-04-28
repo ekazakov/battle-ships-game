@@ -2,6 +2,7 @@ import { BehaviorSubject } from "rxjs";
 import { Store } from "../store/store";
 import { authStoreObservable } from "./auth";
 import { distinctUntilChanged, map } from "rxjs/operators";
+import { baseUrl } from "../util/constants";
 
 const gamesListSubject = new BehaviorSubject({
   status: "idle",
@@ -21,9 +22,10 @@ export function fetchGamesList() {
     error: null
   });
 
-  return fetch("/api/game/list", {
+  return fetch(baseUrl + "/api/game/list", {
     method: "GET",
-    headers
+    headers,
+    credentials: "include"
   })
     .then((response) =>
       response.json().then((data) => {
@@ -82,7 +84,10 @@ export const gameStoreObservable = gameStore.stateChanges();
 export function createGame() {
   gameStore.updateState({ type: GameAction.GAME_UPDATE_STARTED });
 
-  return fetch("/api/game/create", { method: "POST" })
+  return fetch(baseUrl + "/api/game/create", {
+    method: "POST",
+    credentials: "include"
+  })
     .then((response) =>
       response.json().then((data) => {
         if (response.ok) {
@@ -107,7 +112,10 @@ export function createGame() {
 
 export function joinGame(id) {
   gameStore.updateState({ type: GameAction.GAME_UPDATE_STARTED });
-  return fetch(`/api/game/${id}/join`, { method: "POST" })
+  return fetch(baseUrl + `/api/game/${id}/join`, {
+    method: "POST",
+    credentials: "include"
+  })
     .then((response) =>
       response.json().then((data) => {
         if (response.ok) {
@@ -131,7 +139,10 @@ export function joinGame(id) {
 }
 
 export function startGame(id) {
-  return fetch(`/api/game/${id}/start`, { method: "POST" }).then((response) =>
+  return fetch(baseUrl + `/api/game/${id}/start`, {
+    method: "POST",
+    credentials: "include"
+  }).then((response) =>
     response.json().then((data) => {
       if (response.ok) {
         return data;
@@ -143,12 +154,13 @@ export function startGame(id) {
 }
 
 export function makeTurn(id, target) {
-  return fetch(`/api/game/${id}/turn`, {
+  return fetch(baseUrl + `/api/game/${id}/turn`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
-    body: JSON.stringify(target)
+    body: JSON.stringify(target),
+    credentials: "include"
   }).then((response) =>
     response.json().then((data) => {
       if (response.ok) {
@@ -161,8 +173,9 @@ export function makeTurn(id, target) {
 }
 
 export function leaveGame(id) {
-  return fetch(`/api/game/${id}/leave`, {
-    method: "POST"
+  return fetch(baseUrl + `/api/game/${id}/leave`, {
+    method: "POST",
+    credentials: "include"
   }).then((response) =>
     response.json().then((data) => {
       if (response.ok) {
@@ -188,7 +201,9 @@ gameId$.subscribe((gameId) => {
 
 export function startGameUpdatesSubscription(id) {
   gameUpdatesSource?.close();
-  gameUpdatesSource = new EventSource(`/api/game/${id}/subscribe`);
+  gameUpdatesSource = new EventSource(baseUrl + `/api/game/${id}/subscribe`, {
+    withCredentials: true
+  });
 
   gameUpdatesSource.onopen = (evt) => {
     console.log("subscription ready", evt);

@@ -26,11 +26,15 @@ module.exports = {
     extensions: ["*", ".js", ".jsx"]
   },
   devServer: {
+    // TODO: configure public though ENV
+    public: "localhost:3030",
     port: 3000,
-    open: true,
-    proxy: {
-      "/api": "http://localhost:8000"
-    },
+    host: "0.0.0.0",
+    disableHostCheck: true,
+    open: false,
+    // proxy: {
+    //   "/api": "http://localhost:8000"
+    // },
     historyApiFallback: true
   },
   plugins: [

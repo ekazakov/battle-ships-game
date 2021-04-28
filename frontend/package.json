@@ -2,14 +2,9 @@
   "name": "battle-ships",
   "version": "1.0.0",
   "description": "",
-  "main": "backend/src/index.js",
   "scripts": {
     "build": "webpack --mode production",
-    "client": "webpack-dev-server --mode development --devtool inline-source-map",
-    "server": "nodemon backend/src/index.js",
-    "start_new": "",
-    "start": "npm run server",
-    "test": "jest"
+    "start": "webpack-dev-server --mode development --devtool inline-source-map"
   },
   "dependencies": {
     "@emotion/react": "^11.1.5",
@@ -68,6 +63,5 @@
       "last 2 firefox versions",
       "last 2 safari versions"
     ]
-  },
-  "keywords": []
+  }
 }
