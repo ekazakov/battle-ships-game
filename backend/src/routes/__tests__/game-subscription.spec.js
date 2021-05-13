@@ -81,7 +81,7 @@ describe("Game API: Subscription", () => {
     // await joinGame(fastify, bUserId, game.id);
     port = await createServer(fastify);
     subscription = new EventSource(createUrl(port, game.id), {
-      headers: { Cookie: buildAuthCookie(aUserId) }
+      headers: { Cookie: buildAuthCookie(aUserId), Origin: "game.app" }
     });
   });
 
@@ -106,15 +106,13 @@ describe("Game API: Subscription", () => {
       nextEvent(subscription),
       joinGame(fastify, bUserId, game.id)
     ]);
-    expect(evt2).toMatchObject({
-      data: {
-        current: null,
-        enemyBoard: null,
-        ownBoard: null,
-        state: "awaitingStart",
-        waiting: null,
-        winnerId: null
-      }
+    expect(evt2.data).toMatchSnapshot({
+      current: null,
+      state: "awaitingStart",
+      ownerId: "user_1",
+      ownId: "user_1",
+      waiting: null,
+      winnerId: null
     });
   });
 

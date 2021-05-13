@@ -109,11 +109,6 @@ async function routes(fastify) {
       const { id } = request.params;
       const game = await getGameById(id);
 
-      if (!game) {
-        reply.code(400);
-        return reply.send(new Error("Game doesn't exist"));
-      }
-
       await leaveGame(game, user);
 
       reply.code(200);
@@ -220,7 +215,7 @@ async function routes(fastify) {
         );
       })
       .catch((e) => {
-        console.error(e);
+        console.error(e); // ?e
         reply.code(400);
         return reply.send(e);
       });

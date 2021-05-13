@@ -34,6 +34,9 @@ async function nextGameState(gameId, userId) {
 
 async function getGameById(id) {
   const game = await Context.storage.getGameById(id);
+  if (!game) {
+    throw new Error("Game doesn't exist");
+  }
   game.addObserver(() => {
     mediator.emit(`game:${game?.getId()}:updated`, game);
   });
