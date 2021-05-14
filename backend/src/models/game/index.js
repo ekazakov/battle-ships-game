@@ -59,13 +59,14 @@ function createGameMachine(options = {}) {
         leave: transitionTo(States.DESTROYED, function () {})
       },
       [States.AWAITING_START]: {
-        leave: transitionTo(States.AWAITING_PLAYER, function (player) {
-          if (player === this.playerAid) {
-            this.playerAid = null;
-          } else if (player === this.playerBid) {
+        leave: transitionTo(function (playerId) {
+          if (playerId === this.playerAid) {
+            return States.DESTROYED;
+          } else if (playerId === this.playerBid) {
             this.playerBid = null;
+            return States.AWAITING_PLAYER;
           } else {
-            throw Error(`Player with ${player.id} is not in a game`);
+            throw Error(`Player with ${playerId.id} is not in a game`);
           }
         }),
         start: transitionTo(States.PLAYER_TURN, function () {
@@ -170,11 +171,7 @@ exports.Game = class Game extends Observer {
   }
 
   leave(playerId) {
-    if (playerId === this._ownerId) {
-      this._machine.destroy();
-    } else {
-      this._machine.leave(playerId);
-    }
+    this._machine.leave(playerId);
   }
 
   makeShot(player, target) {

@@ -88,15 +88,14 @@ describe("Game API: Subscription", () => {
   it("should create subscription to the game", async () => {
     const evt1 = await nextEvent(subscription);
 
-    expect(evt1).toMatchObject({
-      data: {
-        current: null,
-        enemyBoard: null,
-        ownBoard: null,
-        state: "awaiting",
-        waiting: null,
-        winnerId: null
-      }
+    expect(evt1.data).toMatchSnapshot({
+      current: null,
+      ownerId: "user_1",
+      ownId: "user_1",
+      enemyId: null,
+      state: "awaiting",
+      waiting: null,
+      winnerId: null
     });
   });
 
@@ -111,6 +110,7 @@ describe("Game API: Subscription", () => {
       state: "awaitingStart",
       ownerId: "user_1",
       ownId: "user_1",
+      enemyId: "user_2",
       waiting: null,
       winnerId: null
     });
@@ -131,7 +131,7 @@ describe("Game API: Subscription", () => {
       state: "playerTurn",
       current: "user_1",
       ownerId: "user_1",
-      secondPlayerId: "user_2",
+      enemyId: "user_2",
       winnerId: null
     });
   });
@@ -143,15 +143,14 @@ describe("Game API: Subscription", () => {
       leaveGame(fastify, aUserId, game.id)
     ]);
 
-    expect(evt2).toMatchObject({
-      data: {
-        current: null,
-        enemyBoard: null,
-        ownBoard: null,
-        state: "destroyed",
-        waiting: null,
-        winnerId: null
-      }
+    expect(evt2.data).toMatchSnapshot({
+      current: null,
+      ownerId: "user_1",
+      ownId: "user_1",
+      enemyId: null,
+      state: "destroyed",
+      waiting: null,
+      winnerId: null
     });
   });
 
@@ -169,8 +168,8 @@ describe("Game API: Subscription", () => {
       id: "game_1",
       state: "playerTurn",
       ownerId: "user_1",
-      secondPlayerId: "user_2",
       winnerId: null,
+      enemyId: "user_2",
       current: "user_2",
       waiting: "user_1"
     });

@@ -25,9 +25,7 @@ describe("Auth API", () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.json()).toEqual({
-        result: "success"
-      });
+      expect(res.json()).toEqual({ gameId: null, id: "user_1", name: "UserA" });
 
       const parsedCookie = parseAuthCookie(res.headers["set-cookie"]);
       expect(parsedCookie).toEqual({
@@ -136,9 +134,7 @@ describe("Auth API", () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.json()).toEqual({
-        result: "success"
-      });
+      expect(res.json()).toEqual({ gameId: null, id: "user_1", name: "UserA" });
 
       const parsedCookie = parseAuthCookie(res.headers["set-cookie"]);
       expect(parsedCookie).toEqual({

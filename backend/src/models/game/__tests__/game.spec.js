@@ -92,6 +92,7 @@ describe("Game", function () {
       it("should be in DESTROYED after owner player leave", () => {
         expect.hasAssertions();
         game.join(playerB.getId());
+        expect(game.getState()).toBe(States.AWAITING_START);
         game.leave(playerA.getId());
         expect(game.getState()).toBe(States.DESTROYED);
       });
