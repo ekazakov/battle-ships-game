@@ -1,4 +1,7 @@
-exports.Cell = class Cell {
+export class Cell {
+  private _ship: any;
+  private _isHit: boolean;
+
   constructor() {
     this._ship = null;
     this._isHit = false;
@@ -28,4 +31,4 @@ exports.Cell = class Cell {
       }
     }
   }
-};
+}

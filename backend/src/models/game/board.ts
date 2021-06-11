@@ -1,7 +1,13 @@
-const { ShootResult } = require("../../utils/constants");
-const { BOARD_SIZE, Direction, ShipType } = require("../../utils/constants");
-const { Cell } = require("./cell");
-const { Ship } = require("./ship");
+import { Ship } from "./ship";
+
+import { Cell } from "./cell";
+
+import {
+  BOARD_SIZE,
+  Direction,
+  ShipType,
+  ShootResult
+} from "../../utils/constants";
 
 function createCells(size) {
   const cells = new Array(size);
@@ -9,7 +15,7 @@ function createCells(size) {
   for (let i = 0; i < size; i++) {
     cells[i] = new Array(size);
     for (let j = 0; j < size; j++) {
-      cells[i][j] = new Cell({ x: j, y: i });
+      cells[i][j] = new Cell();
     }
   }
 
@@ -31,8 +37,12 @@ function createDefaultShips() {
   ];
 }
 
-exports.Board = class Board {
-  static createBoard(ships) {
+export class Board {
+  private _size: number;
+  private _cells: Cell[];
+  private _ships: Ship[];
+
+  static createBoard(ships?: Ship[]) {
     ships = ships || createDefaultShips();
     const board = new Board(BOARD_SIZE);
     ships.forEach((ship) => board.addShip(ship));
@@ -163,4 +173,4 @@ exports.Board = class Board {
 
     return board;
   }
-};
+}

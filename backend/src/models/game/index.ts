@@ -1,14 +1,16 @@
-const {
-  StateMachine,
-  transitionTo,
+import {
   getState,
+  STARTING_STATE,
+  StateMachine,
   STATES,
-  STARTING_STATE
-} = require("../../utils/state-machine");
-const { getNextId } = require("../../utils/id-generator");
-const { Observer } = require("../../utils/observer");
-const { Board } = require("./board");
-const { ShootResult } = require("../../utils/constants.js");
+  transitionTo
+} from "../../utils/state-machine";
+
+import { ShootResult } from "../../utils/constants";
+import { Board } from "./board";
+// import { Observer } from "../../utils/observer";
+import { getNextId } from "../../utils/id-generator";
+import { Observer } from "../../utils/observer";
 
 const States = {
   IDLE: "idle",
@@ -19,17 +21,28 @@ const States = {
   DESTROYED: "destroyed"
 };
 
-exports.States = States;
+export { States };
 
-function createGameMachine(options = {}) {
-  const {
-    initialState = States.IDLE,
-    playerAid = null,
-    playerBid = null,
-    boards = new Map(),
-    current = null,
-    waiting = null
-  } = options;
+interface GameMachineOptions {
+  initialState: string;
+  playerAid: string | null;
+  playerBid: string | null;
+  boards: Map<string, Board>;
+  current: string | null;
+  waiting: string | null;
+}
+
+const defaultOptions = {
+  initialState: States.IDLE,
+  playerAid: null,
+  playerBid: null,
+  boards: new Map(),
+  current: null,
+  waiting: null
+};
+function createGameMachine(options: GameMachineOptions = defaultOptions) {
+  const { initialState, playerAid, playerBid, boards, current, waiting } =
+    options;
 
   return StateMachine({
     playerAid,
@@ -104,7 +117,10 @@ function createGameMachine(options = {}) {
   });
 }
 
-exports.Game = class Game extends Observer {
+export class Game extends Observer {
+  private readonly _id: any;
+  private readonly _ownerId: any;
+  private readonly _machine: any;
   static createGame(ownerId) {
     return new Game(ownerId, getNextId("game"), createGameMachine());
   }
@@ -118,7 +134,7 @@ exports.Game = class Game extends Observer {
       this._machine.initialize(ownerId);
     }
     this._machine.onStateTransition = () => {
-      this._notify("update", this.getGameStateForPlayer());
+      this._notify("update", {});
     };
   }
 
@@ -148,8 +164,8 @@ exports.Game = class Game extends Observer {
 
   isOver() {
     return (
-      this.getGameStateForPlayer() === States.DESTROYED ||
-      this.getGameStateForPlayer() === States.FINISHED
+      this.getState() === States.DESTROYED ||
+      this.getState() === States.FINISHED
     );
   }
 
@@ -195,7 +211,7 @@ exports.Game = class Game extends Observer {
     return this._machine.boards.get(player);
   }
 
-  _getSnapshot() {
+  private _getSnapshot() {
     const current = this.getCurrentPlayer();
     const waiting = this.getWaitingPlayer();
     const ownerBoard = this.getBoard(this._ownerId);
@@ -279,4 +295,4 @@ exports.Game = class Game extends Observer {
 
     return new Game(gameData.ownerId, gameData.id, machine);
   }
-};
+}

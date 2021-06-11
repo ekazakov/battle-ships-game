@@ -1,7 +1,9 @@
-const events = require("events");
-const { mediator } = require("../mediator");
-const { Game } = require("../models/game");
-const { Context } = require("../context");
+import { once } from "events";
+import { mediator } from "../mediator";
+
+import { Game } from "../models/game";
+
+import { Context } from "../context";
 
 async function createNewGame(userId) {
   const user = await Context.storage.getUserById(userId);
@@ -27,9 +29,9 @@ async function getGamesList() {
 }
 
 async function nextGameState(gameId, userId) {
-  return events
-    .once(mediator, `game:${gameId}:updated`)
-    .then(([game]) => game.getGameStateForPlayer(userId));
+  return once(mediator, `game:${gameId}:updated`).then(([game]) =>
+    game.getGameStateForPlayer(userId)
+  );
 }
 
 async function getGameById(id) {
@@ -85,7 +87,7 @@ async function leaveGame(game, user) {
   return Context.storage.updateGame(game);
 }
 
-module.exports = {
+export {
   createNewGame,
   getGameById,
   getGamesList,

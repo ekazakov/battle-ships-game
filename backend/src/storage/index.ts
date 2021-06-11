@@ -1,13 +1,15 @@
-const { Mutex } = require("async-mutex");
-const low = require("lowdb");
-const lodashId = require("lodash-id");
-const FileAsync = require("lowdb/adapters/FileAsync");
-const Base = require("lowdb/adapters/Base");
-const { User } = require("../models/user");
-const { Game } = require("../models/game");
+import { Mutex } from "async-mutex";
+import low from "lowdb";
+import lodashId from "lodash-id";
+import FileAsync from "lowdb/adapters/FileAsync";
+import Base from "lowdb/adapters/Base";
+import { User } from "../models/user";
+
+import { Game } from "../models/game";
 
 class MemoryAsync extends Base {
   _data = null;
+  defaultValue: any;
 
   read() {
     return Promise.resolve(this._data || this.defaultValue);
@@ -28,28 +30,30 @@ async function initDb(adapter, defaultData) {
   return db;
 }
 
-exports.Storage = class Storage {
+export class DataStorage {
+  private _db: any;
+  _dbMutex: Mutex;
   static async createMemoryStore(defaultData = { users: [], games: [] }) {
-    const adapter = new MemoryAsync();
+    const adapter = new MemoryAsync("");
     const db = await initDb(adapter, defaultData);
-    return new Storage(db);
+    return new DataStorage(db);
   }
 
   static async resetMemoryStore(
     storage,
     defaultData = { users: [], games: [] }
   ) {
-    const adapter = new MemoryAsync();
+    const adapter = new MemoryAsync("");
     storage._db = await initDb(adapter, defaultData);
   }
 
   static async createFileStore(defaultData = { users: [], games: [] }) {
     const adapter = new FileAsync("database.json");
     const db = await initDb(adapter, defaultData);
-    return new Storage(db);
+    return new DataStorage(db);
   }
 
-  constructor(db) {
+  constructor(db: low.LowdbAsync<any>) {
     if (!db) {
       throw new Error("Database instance should be provided");
     }
@@ -58,7 +62,7 @@ exports.Storage = class Storage {
     this._dbMutex = new Mutex();
   }
 
-  async _isUserWithNameExists(name) {
+  async _isUserWithNameExists(name: string) {
     return (await this._db.get("users").find({ name }).value()) != null;
   }
 
@@ -66,17 +70,17 @@ exports.Storage = class Storage {
     return (await this._db.get("users").find({ id }).value()) != null;
   }
 
-  async getUserById(id) {
+  async getUserById(id): Promise<User | null> {
     const data = await this._db.get("users").find({ id }).value();
     return data != null ? User.deserialize(data) : null;
   }
 
-  async getUserByName(name) {
+  async getUserByName(name): Promise<User | null> {
     const data = await this._db.get("users").find({ name }).value();
     return data != null ? User.deserialize(data) : null;
   }
 
-  async addUser(user) {
+  async addUser(user: User) {
     try {
       return await this._dbMutex.runExclusive(async () => {
         const name = user.getName();
@@ -104,14 +108,17 @@ exports.Storage = class Storage {
   }
 
   async getUsers() {
-    return await this._db.get("users").map(User.deserialize).value();
+    return (await this._db
+      .get("users")
+      .map(User.deserialize)
+      .value()) as User[];
   }
 
   async _isGameWithIdExists(id) {
     return (await this._db.get("games").find({ id }).value()) != null;
   }
 
-  async addGame(game) {
+  async addGame(game: Game) {
     try {
       return await this._dbMutex.runExclusive(async () => {
         if (await this._isGameWithIdExists(game.getId())) {
@@ -132,17 +139,17 @@ exports.Storage = class Storage {
     }
   }
 
-  async getGameById(id) {
+  async getGameById(id): Promise<Game | null> {
     const data = await this._db.get("games").find({ id }).value();
     return data != null ? Game.deserialize(data) : null;
   }
 
   async getGames() {
     const games = await this._db.get("games").value();
-    return (games || []).map(Game.deserialize);
+    return (games || []).map(Game.deserialize) as Game[];
   }
 
-  async updateGame(game) {
+  async updateGame(game: Game) {
     await this._db
       .get("games")
       .updateById(game.getId(), Game.serialize(game))
@@ -150,11 +157,11 @@ exports.Storage = class Storage {
     return game;
   }
 
-  async updateUser(user) {
+  async updateUser(user: User) {
     await this._db
       .get("users")
       .updateById(user.getId(), User.serialize(user))
       .write();
     return user;
   }
-};
+}

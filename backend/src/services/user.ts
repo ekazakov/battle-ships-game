@@ -1,5 +1,5 @@
-const { User } = require("../models/user");
-const { Context } = require("../context");
+import { User } from "../models/user";
+import { Context } from "../context";
 
 async function isUserWithNameExists(name) {
   return (await Context.storage.getUserByName(name)) != null;
@@ -19,9 +19,4 @@ async function getUserByName(name) {
   return await Context.storage.getUserByName(name);
 }
 
-module.exports = {
-  isUserWithNameExists,
-  getUserById,
-  getUserByName,
-  registerUser
-};
+export { isUserWithNameExists, getUserById, getUserByName, registerUser };

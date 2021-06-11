@@ -1,6 +1,6 @@
 const counters = new Map();
 
-exports.getNextId = function getNextId(prefix) {
+export function getNextId(prefix) {
   if (counters.has(prefix)) {
     const value = counters.get(prefix) + 1;
     counters.set(prefix, value);
@@ -9,8 +9,8 @@ exports.getNextId = function getNextId(prefix) {
 
   counters.set(prefix, 1);
   return `${prefix}_${1}`;
-};
+}
 
-exports.resetIds = function resetIds() {
+export function resetIds() {
   counters.clear();
-};
+}

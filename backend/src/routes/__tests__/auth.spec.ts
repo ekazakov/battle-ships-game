@@ -1,13 +1,12 @@
-const { buildAuthCookie } = require("../../utils/cookie");
-const { parseAuthCookie } = require("../../utils/cookie");
-const { buildFastify } = require("../../app");
-const { Storage } = require("../../storage");
+import { buildAuthCookie, parseAuthCookie } from "../../utils/cookie";
+import { buildFastify } from "../../app";
+import { DataStorage } from "../../storage";
 
 describe("Auth API", () => {
   describe("Registration", () => {
     let fastify = null;
     beforeEach(async () => {
-      const storage = await Storage.createMemoryStore();
+      const storage = await DataStorage.createMemoryStore();
       fastify = await buildFastify({ storage });
     });
 

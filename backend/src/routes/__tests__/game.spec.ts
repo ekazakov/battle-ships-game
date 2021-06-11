@@ -1,20 +1,21 @@
-const {
-  leaveGame,
-  startGame,
-  joinGame,
+import {
   createGame,
-  registerUser
-} = require("../../test-helpers/game-actions");
-const { buildAuthCookie } = require("../../utils/cookie");
-const { buildFastify } = require("../../app");
-const { Storage } = require("../../storage");
+  joinGame,
+  leaveGame,
+  registerUser,
+  startGame
+} from "../../test-helpers/game-actions";
+
+import { buildAuthCookie } from "../../utils/cookie";
+import { buildFastify } from "../../app";
+import { DataStorage } from "../../storage";
 
 describe("Game API", () => {
   let fastify = null;
   let storage = null;
 
   beforeEach(async () => {
-    storage = await Storage.createMemoryStore();
+    storage = await DataStorage.createMemoryStore();
     fastify = await buildFastify({ storage });
   });
 
@@ -34,7 +35,7 @@ describe("Game API", () => {
     });
 
     afterEach(async () => {
-      await Storage.resetMemoryStore(storage);
+      await DataStorage.resetMemoryStore(storage);
     });
 
     it("should create new game", async () => {

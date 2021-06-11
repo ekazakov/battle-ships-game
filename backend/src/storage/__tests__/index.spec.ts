@@ -1,11 +1,11 @@
-const { Storage } = require("../index");
-const { Game } = require("../../models/game");
-const { User } = require("../../models/user");
+import { DataStorage } from "../index";
+import { Game } from "../../models/game";
+import { User } from "../../models/user";
 
 describe("Storage", () => {
   let storage = null;
   beforeEach(async () => {
-    storage = await Storage.createMemoryStore();
+    storage = await DataStorage.createMemoryStore();
   });
 
   describe("User", () => {
@@ -117,7 +117,7 @@ describe("Storage", () => {
           Game.createGame(newUser2.getId())
         ];
         await Promise.all(gamesList.map((g) => storage.addGame(g)));
-        games = gamesList.map((g) => g.getGameStateForPlayer());
+        games = gamesList.map((g) => g.getFullGameState());
       });
 
       afterEach(async () => {
@@ -125,8 +125,8 @@ describe("Storage", () => {
       });
 
       it("should return list of all games", async () => {
-        const list = (await storage.getGames()).map((game) =>
-          game.getGameStateForPlayer()
+        const list = (await storage.getGames()).map((game: Game) =>
+          game.getFullGameState()
         );
         expect(list).toEqual(games);
       });

@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "allowJs": true,
+    "noImplicitAny": false,
+    "allowSyntheticDefaultImports": true,
+    "downlevelIteration": true,
+    "moduleResolution": "node",
+    "lib": ["ES2020"],
+    "module": "ESNext",
+    "target": "ESNext",
+
+    "baseUrl": ".",
+    "paths": {
+      "*": ["node_modules/*", "src/types/*"]
+    },
+    "typeRoots": ["node_modules/@types", "src/types"],
+    "outDir": "./built"
+  },
+  "include": ["./src/**/*", "jest.config.js"],
+  "exclude": ["node_modules"]
+}

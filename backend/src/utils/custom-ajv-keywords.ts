@@ -6,6 +6,7 @@ async function checkLogin(schema, data) {
   // console.log("parentSchema", parentSchema);
   // console.log("dataCtx", dataCtx);
   if (await isUserWithNameExists(data)) {
+    // @ts-ignore
     checkLogin.errors = [
       {
         message: "User with such login already exists"
@@ -22,6 +23,7 @@ async function checkUser(schema, data) {
     return true;
   }
 
+  // @ts-ignore
   checkUser.errors = [
     {
       message: "User with such login doesn't exist"
@@ -45,4 +47,4 @@ const uniqueLogin = (ajv) => {
   });
 };
 
-module.exports = uniqueLogin;
+export default uniqueLogin;

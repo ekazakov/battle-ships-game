@@ -1,9 +1,6 @@
 const { buildAuthCookie, parseAuthCookie } = require("../utils/cookie");
 
-exports.registerUser = async function registerUser(
-  fastify,
-  { login, password }
-) {
+export async function registerUser(fastify, { login, password }) {
   const res = await fastify.inject({
     method: "POST",
     url: "/api/register",
@@ -14,9 +11,9 @@ exports.registerUser = async function registerUser(
     throw new Error(res.json().message);
   }
   return parseAuthCookie(res.headers["set-cookie"]).id;
-};
+}
 
-exports.createGame = async function createGame(fastify, userId) {
+export async function createGame(fastify, userId) {
   const res = await fastify.inject({
     method: "POST",
     url: "/api/game/create",
@@ -26,9 +23,9 @@ exports.createGame = async function createGame(fastify, userId) {
   });
 
   return res.json();
-};
+}
 
-exports.joinGame = async function joinGame(fastify, userId, gameId) {
+export async function joinGame(fastify, userId, gameId) {
   const res = await fastify.inject({
     method: "POST",
     url: `/api/game/${gameId}/join`,
@@ -42,9 +39,9 @@ exports.joinGame = async function joinGame(fastify, userId, gameId) {
   }
 
   return res;
-};
+}
 
-exports.leaveGame = async function leaveGame(fastify, userId, gameId) {
+export async function leaveGame(fastify, userId, gameId) {
   const res = await fastify.inject({
     method: "POST",
     url: `/api/game/${gameId}/leave`,
@@ -59,9 +56,9 @@ exports.leaveGame = async function leaveGame(fastify, userId, gameId) {
   }
 
   return res;
-};
+}
 
-exports.startGame = async function startGame(fastify, userId, gameId) {
+export async function startGame(fastify, userId, gameId) {
   const res = await fastify.inject({
     method: "POST",
     url: `/api/game/${gameId}/start`,
@@ -75,9 +72,9 @@ exports.startGame = async function startGame(fastify, userId, gameId) {
   }
 
   return res;
-};
+}
 
-exports.makeTurn = async function makeTurn(fastify, userId, gameId, target) {
+export async function makeTurn(fastify, userId, gameId, target) {
   const res = await fastify.inject({
     method: "POST",
     url: `/api/game/${gameId}/turn`,
@@ -92,9 +89,9 @@ exports.makeTurn = async function makeTurn(fastify, userId, gameId, target) {
   }
 
   return res;
-};
+}
 
-exports.getGame = async function getGame(fastify, userId, gameId) {
+export async function getGame(fastify, userId, gameId) {
   return await fastify.inject({
     method: "GET",
     url: `/api/game/${gameId}`,
@@ -102,4 +99,4 @@ exports.getGame = async function getGame(fastify, userId, gameId) {
       cookie: buildAuthCookie(userId)
     }
   });
-};
+}

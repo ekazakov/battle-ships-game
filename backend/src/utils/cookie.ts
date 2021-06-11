@@ -1,8 +1,8 @@
-exports.buildAuthCookie = function buildAuthCookie(id) {
+export function buildAuthCookie(id) {
   return `auth=${encodeURIComponent(`auth-token#${id}`)}`;
-};
+}
 
-exports.parseAuthCookie = function parseAuthCookie(cookieHeader) {
+export function parseAuthCookie(cookieHeader) {
   const [name, cookieValue] = cookieHeader.split("=");
   const [value] = cookieValue.split(";");
   const [prefix, id] = decodeURIComponent(value).split("#");
@@ -12,9 +12,9 @@ exports.parseAuthCookie = function parseAuthCookie(cookieHeader) {
     prefix,
     id
   };
-};
+}
 
-exports.getUserIdFromCookie = function getUserIdFromCookie(cookie) {
+export function getUserIdFromCookie(cookie) {
   const [, id] = cookie.split("#");
   return id;
-};
+}

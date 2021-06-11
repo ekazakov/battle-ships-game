@@ -1,6 +1,6 @@
-const { getUserIdFromCookie } = require("../utils/cookie");
-const { getUserById } = require("../services/user");
-const { authCheck } = require("../utils/auth-check");
+import { getUserIdFromCookie } from "../utils/cookie";
+import { getUserById } from "../services/user";
+import { authCheck } from "../utils/auth-check";
 
 // TODO: add tests
 async function routes(fastify) {
@@ -25,4 +25,4 @@ async function routes(fastify) {
   });
 }
 
-module.exports = routes;
+export { routes as users };

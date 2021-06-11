@@ -1,9 +1,10 @@
-const {
-  isUserWithNameExists,
+import {
   getUserByName,
+  isUserWithNameExists,
   registerUser
-} = require("../services/user");
-const { authCheck } = require("../utils/auth-check");
+} from "../services/user";
+
+import { authCheck } from "../utils/auth-check";
 
 const passwordScheme = {
   password: { type: "string", minLength: 5, maxLength: 50 }
@@ -96,4 +97,4 @@ async function routes(fastify) {
   });
 }
 
-module.exports = routes;
+export { routes as auth };

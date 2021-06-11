@@ -1,27 +1,30 @@
-const EventSource = require("eventsource");
-const {
-  makeTurn,
-  leaveGame,
-  startGame,
-  joinGame,
+import EventSource from "eventsource";
+import {
   createGame,
-  registerUser
-} = require("../../test-helpers/game-actions");
-const { buildAuthCookie } = require("../../utils/cookie");
-const { buildFastify } = require("../../app");
-const { Storage } = require("../../storage");
+  joinGame,
+  leaveGame,
+  makeTurn,
+  registerUser,
+  startGame
+} from "../../test-helpers/game-actions";
+
+import { buildAuthCookie } from "../../utils/cookie";
+
+import { buildFastify } from "../../app";
+
+import { DataStorage } from "../../storage";
 
 const createUrl = (port, id) =>
   `http://localhost:${port}/api/game/${id}/subscribe`;
 
 function nextEvent(es) {
-  return new Promise((resolve, reject) => {
-    es.onmessage = (evt) => {
+  return new Promise<{ data: unknown }>((resolve, reject) => {
+    es.onmessage = (evt: { data: string }) => {
       // console.log("message:", evt);
       resolve({ ...evt, data: JSON.parse(evt.data) });
     };
 
-    es.onerror = (evt) => {
+    es.onerror = (evt: { message: string }) => {
       if (evt.message != null) {
         console.log("onerror", evt.message);
         reject(evt);
@@ -50,7 +53,7 @@ describe("Game API: Subscription", () => {
   let fastify = null;
 
   beforeEach(async () => {
-    const storage = await Storage.createMemoryStore();
+    const storage = await DataStorage.createMemoryStore();
     fastify = await buildFastify({ storage });
   });
 

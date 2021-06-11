@@ -5,7 +5,7 @@ const STARTING_STATE = Symbol("starting-state");
 const ON_STATE_TRANSITION = Symbol("on-state-transition");
 const RESERVED = [STATES, STARTING_STATE];
 
-exports.StateMachine = function StateMachine(description) {
+export function StateMachine(description) {
   const machine = {
     [ON_STATE_TRANSITION]() {
       if (typeof this.onStateTransition === "function") {
@@ -15,6 +15,7 @@ exports.StateMachine = function StateMachine(description) {
   };
 
   const propsAndMethods = Object.keys(description).filter(
+    // @ts-ignore
     (prop) => !RESERVED.includes(prop)
   );
 
@@ -34,7 +35,7 @@ exports.StateMachine = function StateMachine(description) {
 
       return names;
     },
-    new Set()
+    new Set<string>()
   );
 
   for (const eventName of eventNames) {
@@ -54,9 +55,9 @@ exports.StateMachine = function StateMachine(description) {
   machine[STATE] = description[STATES][description[STARTING_STATE]];
   machine[CURRENT_STATE_NAME] = description[STARTING_STATE];
   return machine;
-};
+}
 
-exports.transitionTo = function transitionTo(...params) {
+export function transitionTo(...params) {
   if (params.length === 2) {
     const [stateName, fn] = params;
     return function transition(...args) {
@@ -78,12 +79,12 @@ exports.transitionTo = function transitionTo(...params) {
   }
 
   throw new Error("Unsupported arguments");
-};
+}
 
-exports.getState = function getState(machine) {
+export function getState(machine) {
   return machine[CURRENT_STATE_NAME];
-};
+}
 
-exports.STATES = STATES;
+export { STATES };
 
-exports.STARTING_STATE = STARTING_STATE;
+export { STARTING_STATE };

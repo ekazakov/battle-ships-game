@@ -1,6 +1,6 @@
-const { resetIds } = require("../../../utils/id-generator");
-const { Direction } = require("../../../utils/constants");
-const { Game, States } = require("../index");
+import { resetIds } from "../../../utils/id-generator";
+import { Game, States } from "../index";
+import { Direction } from "../../../utils/constants";
 
 function createPlayer(id) {
   return {

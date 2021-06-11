@@ -1,4 +1,4 @@
-exports.Context = class Context {
+export class Context {
   static get storage() {
     if (this._storage == null) {
       console.error("Storage is not initialized");
@@ -12,4 +12,4 @@ exports.Context = class Context {
   }
 
   static _storage;
-};
+}

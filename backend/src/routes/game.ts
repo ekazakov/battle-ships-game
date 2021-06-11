@@ -1,16 +1,19 @@
-const { authCheck } = require("../utils/auth-check");
-const { getUserIdFromCookie } = require("../utils/cookie");
-const { getUserById } = require("../services/user");
-const {
-  nextGameState,
+import { authCheck } from "../utils/auth-check";
+
+import { getUserIdFromCookie } from "../utils/cookie";
+
+import { getUserById } from "../services/user";
+
+import {
+  createNewGame,
   getGameById,
   getGamesList,
-  createNewGame,
-  startGame,
   joinGame,
+  leaveGame,
   makeGameTurn,
-  leaveGame
-} = require("../services/game");
+  nextGameState,
+  startGame
+} from "../services/game";
 
 // TODO: use https://github.com/snd/url-pattern for testing urls
 const anAuthorizedAccessList = ["/api/game/list"];
@@ -222,4 +225,4 @@ async function routes(fastify) {
   });
 }
 
-module.exports = routes;
+export { routes as game };

@@ -1,7 +1,8 @@
-const { getUserById } = require("../services/user");
-const { getUserIdFromCookie } = require("./cookie");
+import { getUserIdFromCookie } from "./cookie";
 
-exports.authCheck = async function authCheck(request) {
+const { getUserById } = require("../services/user");
+
+export async function authCheck(request) {
   try {
     if (!request.cookies.auth) {
       return { code: 400, error: new Error("User not authorized") };
@@ -16,4 +17,4 @@ exports.authCheck = async function authCheck(request) {
   } catch (error) {
     return { code: 400, error };
   }
-};
+}

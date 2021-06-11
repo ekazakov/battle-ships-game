@@ -1,4 +1,9 @@
-exports.Ship = class Ship {
+export class Ship {
+  private readonly _size: number;
+  private readonly _direction: any;
+  private readonly _position: any;
+  private _health: number;
+
   constructor(size, direction, position) {
     this._size = size;
     this._health = size;
@@ -40,7 +45,7 @@ exports.Ship = class Ship {
     };
   }
 
-  static deserialize({ size, direction, position } = {}) {
+  static deserialize({ size, direction, position }) {
     return new Ship(size, direction, position);
   }
-};
+}
