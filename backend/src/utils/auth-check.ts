@@ -1,6 +1,5 @@
 import { getUserIdFromCookie } from "./cookie";
-
-const { getUserById } = require("../services/user");
+import { getUserById } from "../services/user";
 
 export async function authCheck(request) {
   try {

@@ -1,4 +1,4 @@
-const { buildFastify } = require("./app");
+import { buildFastify } from "./app";
 
 const port = process.env.PORT || 80;
 

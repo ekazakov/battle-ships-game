@@ -1,8 +1,8 @@
 module.exports = function () {
   return {
-    files: ["src/**/*.js", "!/**/*.spec.js"],
+    files: ["src/**/*.ts", "!/**/*.spec.ts"],
 
-    tests: ["src/**/*.spec.js"],
+    tests: ["src/**/*.spec.ts"],
     testFramework: {
       type: "jest"
     },

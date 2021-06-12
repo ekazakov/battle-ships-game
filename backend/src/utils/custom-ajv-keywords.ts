@@ -1,4 +1,4 @@
-const { isUserWithNameExists } = require("../services/user");
+import { isUserWithNameExists } from "../services/user";
 
 async function checkLogin(schema, data) {
   // console.log("schema", schema);

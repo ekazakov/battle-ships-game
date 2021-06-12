@@ -108,7 +108,8 @@ describe("Auth API", () => {
     let fastify = null;
 
     beforeEach(async () => {
-      fastify = await buildFastify();
+      const storage = await DataStorage.createMemoryStore();
+      fastify = await buildFastify({ storage });
     });
 
     afterEach(() => {

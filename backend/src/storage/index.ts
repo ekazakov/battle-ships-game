@@ -4,12 +4,11 @@ import lodashId from "lodash-id";
 import FileAsync from "lowdb/adapters/FileAsync";
 import Base from "lowdb/adapters/Base";
 import { User } from "../models/user";
-
 import { Game } from "../models/game";
 
 class MemoryAsync extends Base {
   _data = null;
-  defaultValue: any;
+  defaultValue: any = { users: [], games: [] };
 
   read() {
     return Promise.resolve(this._data || this.defaultValue);
@@ -19,9 +18,6 @@ class MemoryAsync extends Base {
     return Promise.resolve(data);
   }
 }
-// const games = new Map();
-// const usersByName = new Map();
-// const usersById = new Map();
 
 async function initDb(adapter, defaultData) {
   const db = await low(adapter);
@@ -34,7 +30,8 @@ export class DataStorage {
   private _db: any;
   _dbMutex: Mutex;
   static async createMemoryStore(defaultData = { users: [], games: [] }) {
-    const adapter = new MemoryAsync("");
+    // @ts-ignore
+    const adapter = new MemoryAsync();
     const db = await initDb(adapter, defaultData);
     return new DataStorage(db);
   }
@@ -43,7 +40,8 @@ export class DataStorage {
     storage,
     defaultData = { users: [], games: [] }
   ) {
-    const adapter = new MemoryAsync("");
+    // @ts-ignore
+    const adapter = new MemoryAsync();
     storage._db = await initDb(adapter, defaultData);
   }
 
@@ -67,7 +65,11 @@ export class DataStorage {
   }
 
   async _isUserWithIdExists(id) {
-    return (await this._db.get("users").find({ id }).value()) != null;
+    const usr = await this._db.get("users").find({ id }).value();
+    // console.log("test usr:", usr);
+    const users = await this._db.get("users").value();
+    // console.log("users", users);
+    return usr != null;
   }
 
   async getUserById(id): Promise<User | null> {

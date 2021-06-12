@@ -1,4 +1,4 @@
-const { buildAuthCookie, parseAuthCookie } = require("../utils/cookie");
+import { buildAuthCookie, parseAuthCookie } from "../utils/cookie";
 
 export async function registerUser(fastify, { login, password }) {
   const res = await fastify.inject({
